@@ -10,79 +10,97 @@ import GameplayKit
 
 class GameScene: SKScene {
     
+    var ship: SKSpriteNode!
     private var label : SKLabelNode?
     private var spinnyNode : SKShapeNode?
+    private var spaceshipTouch: UITouch?
     
     override func didMove(to view: SKView) {
         
-        // Get label node from scene and store it for use later
-        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        if let label = self.label {
-            label.alpha = 0.0
-            label.run(SKAction.fadeIn(withDuration: 2.0))
-        }
-        
-        // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
-        
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 2.5
-            
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
-            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                              SKAction.fadeOut(withDuration: 0.5),
-                                              SKAction.removeFromParent()]))
-        }
+        let spaceshipYPositon = -(self.size.height / 2) + 150
+
+        self.backgroundColor = .black
+        self.ship = SKSpriteNode(imageNamed: "ship_sprite")
+        self.ship.name = "spaceship"
+        self.ship.size = CGSize(width: 50, height: 55)
+        self.ship.position = CGPoint(x: 0, y: spaceshipYPositon)
+        self.addChild(self.ship)
+
+        //self.physicsWorld.contactDelegate = self
+
+        /*self.scoreLabel = SKLabelNode(text: "SCORE: 0")
+        self.scoreLabel.position = CGPoint(x: 0, y: (self.size.height / 2) - 50)
+        self.addChild(self.scoreLabel)*/
     }
     
     
-    func touchDown(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.green
-            self.addChild(n)
+    override func touchesBegan(_ touches: Set<UITouch>, with _: UIEvent?) {
+        guard self.spaceshipTouch == nil
+        else {
+            self.shoot()
+            return
         }
-    }
-    
-    func touchMoved(toPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.blue
-            self.addChild(n)
+
+        if let touch = touches.first {
+            self.spaceshipTouch = touch
+            let newPosition = touch.location(in: self)
+            let action = SKAction.moveTo(x: newPosition.x, duration: 0.5)
+            action.timingMode = .easeInEaseOut
+            self.ship.run(action)
         }
     }
-    
-    func touchUp(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.red
-            self.addChild(n)
-        }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with _: UIEvent?) {
+        guard let spaceshipTouch = self.spaceshipTouch else { return }
+        guard let touchIndex = touches.firstIndex(of: spaceshipTouch) else { return }
+
+        let touch = touches[touchIndex]
+
+        let newPosition = touch.location(in: self)
+        let action = SKAction.moveTo(x: newPosition.x, duration: 0.05)
+        action.timingMode = .easeInEaseOut
+        self.ship.run(action)
     }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
-        }
-        
-        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with _: UIEvent?) {
+        guard let spaceshipTouch = self.spaceshipTouch else { return }
+        guard touches.firstIndex(of: spaceshipTouch) != nil else { return }
+
+        self.spaceshipTouch = nil
     }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
-    }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
-    }
-    
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with _: UIEvent?) {
+        guard let spaceshipTouch = self.spaceshipTouch else { return }
+        guard touches.firstIndex(of: spaceshipTouch) != nil else { return }
+
+        self.spaceshipTouch = nil
     }
     
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
+        self.cleanPastShoots()
+    }
+    
+    func shoot() {
+        let sprite = SKSpriteNode(imageNamed: "Shoot")
+        sprite.position = self.ship.position
+        sprite.name = "shoot"
+        sprite.zPosition = 1
+        addChild(sprite)
+        sprite.physicsBody = SKPhysicsBody(texture: sprite.texture!, size: sprite.size)
+        sprite.physicsBody?.velocity = CGVector(dx: 0, dy: 500)
+        sprite.physicsBody?.affectedByGravity = false
+        sprite.physicsBody?.linearDamping = 0
+        sprite.physicsBody?.contactTestBitMask = 0x0000_0101
+    }
+    
+    func cleanPastShoots() {
+        for node in children {
+            guard node.name == "shoot" else { continue }
+            if node.position.y > (self.size.height / 2) || node.position.y < -(self.size.height / 2) {
+                node.removeFromParent()
+            }
+        }
     }
 }
