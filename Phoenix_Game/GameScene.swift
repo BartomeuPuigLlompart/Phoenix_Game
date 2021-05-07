@@ -1,21 +1,25 @@
-//
-//  GameScene.swift
-//  Phoenix_Game
-//
-//  Created by Bartomeu on 30/4/21.
-//
-
 import SpriteKit
 import GameplayKit
 
 class GameScene: SKScene {
     
+    public enum GameState {
+        case LEVEL1
+        case LEVEL2
+        case LEVEL3
+    }
+    
     var ship: SKSpriteNode!
     private var label : SKLabelNode?
     private var spinnyNode : SKShapeNode?
     private var spaceshipTouch: UITouch?
+    var gameState : GameState?
+    
+    
     
     override func didMove(to view: SKView) {
+        
+        gameState = GameState.LEVEL1
         
         let spaceshipYPositon = -(self.size.height / 2) + 150
 
@@ -31,6 +35,7 @@ class GameScene: SKScene {
         /*self.scoreLabel = SKLabelNode(text: "SCORE: 0")
         self.scoreLabel.position = CGPoint(x: 0, y: (self.size.height / 2) - 50)
         self.addChild(self.scoreLabel)*/
+        self.addBirds()
     }
     
     
