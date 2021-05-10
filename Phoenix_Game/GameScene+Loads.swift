@@ -19,6 +19,8 @@ extension GameScene {
         switch self.gameState
         {
         case GameState.LEVEL1?:
+            enemies = [Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy(),
+                       Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy()]
             let enemyAnimatedAtlas = SKTextureAtlas(named: "enemy_\(1)")
             var moveFrames: [SKTexture] = []
 
@@ -38,12 +40,19 @@ extension GameScene {
             enemy.name = "enemy_\(1)_\(1)"
             enemy.physicsBody?.affectedByGravity = false
             enemy.physicsBody?.isDynamic = false
-            self.addChild(enemy)
-
-            enemy.run(SKAction.repeatForever(SKAction.animate(with: moveFrames,
-                                                              timePerFrame: 0.3,
-                                                              resize: false,
-                                                              restore: true)))
+            
+            for index in 0 ... enemies.count - 1
+            {
+                //let copiedNode = nodeToCopy.copy() as! SKSpriteNode
+                self.enemies[index].node = enemy.copy() as! SKSpriteNode
+                self.enemies[index].initialPos = CGPoint(x: CGFloat(index * 40) - self.size.width / 2 + enemy.size.width, y: enemy.position.y)
+                self.enemies[index].node.position = self.enemies[index].initialPos
+                self.addChild(self.enemies[index].node)
+                self.enemies[index].node.run(SKAction.repeatForever(SKAction.animate(with: moveFrames,
+                                                                                     timePerFrame: 0.3,
+                                                                                     resize: false,
+                                                                                     restore: true)))
+            }
         default:
             return
         }

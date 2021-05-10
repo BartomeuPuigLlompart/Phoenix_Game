@@ -9,11 +9,26 @@ class GameScene: SKScene {
         case LEVEL3
     }
     
+    public enum EnemyState {
+        case STANDBY
+        case ATTACKING
+        case LOOPING
+    }
+    
+    public struct Enemy
+    {
+        var node: SKSpriteNode = SKSpriteNode()
+        var initialPos: CGPoint = CGPoint(x: 0, y: 0)
+        var state: EnemyState = EnemyState.STANDBY
+    }
+    
     var ship: SKSpriteNode!
+    var enemies: [Enemy]!
     private var label : SKLabelNode?
     private var spinnyNode : SKShapeNode?
     private var spaceshipTouch: UITouch?
     var gameState : GameState?
+    var enemiesAttackTimer : Timer?
     
     
     
@@ -29,12 +44,13 @@ class GameScene: SKScene {
         self.ship.size = CGSize(width: 50, height: 55)
         self.ship.position = CGPoint(x: 0, y: spaceshipYPositon)
         self.addChild(self.ship)
-
-        //self.physicsWorld.contactDelegate = self
-
-        /*self.scoreLabel = SKLabelNode(text: "SCORE: 0")
-        self.scoreLabel.position = CGPoint(x: 0, y: (self.size.height / 2) - 50)
-        self.addChild(self.scoreLabel)*/
+        
+        self.enemiesAttackTimer = Timer.scheduledTimer(timeInterval: 7,
+                                                     target: self,
+                                                     selector: #selector(setNewAttackers),
+                                                     userInfo: nil,
+                                                     repeats: true)
+        
         self.addBirds()
     }
     
@@ -98,4 +114,11 @@ class GameScene: SKScene {
             }
         }
     }
+        @objc
+        func setNewAttackers()
+        {
+            for enemy in enemies {
+                
+                }
+            }
 }
