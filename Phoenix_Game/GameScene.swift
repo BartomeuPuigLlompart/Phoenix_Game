@@ -13,6 +13,7 @@ class GameScene: SKScene {
         case STANDBY
         case ATTACKING
         case LOOPING
+        case FLEE
     }
     
     public struct Enemy
@@ -101,6 +102,7 @@ class GameScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
         self.cleanPastShoots()
+        self.updateBird()
     }
 }
     
@@ -117,8 +119,22 @@ class GameScene: SKScene {
         @objc
         func setNewAttackers()
         {
-            for enemy in enemies {
-                
+            var counter = 0
+            var lastEnemy = Enemy()
+            for index in 0 ... enemies.count - 1
+            {
+                guard enemies[index].node.parent != nil else { continue }
+                lastEnemy = enemies[index]
+                if Int.random(in: 0..<3) == 1 {
+                    counter += 1
+                    enemies[index].state = EnemyState.ATTACKING
+                    enemies[index].node.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
                 }
+            }
+            if lastEnemy.node.parent != nil && counter == 0
+            {
+                lastEnemy.state = EnemyState.ATTACKING
+                lastEnemy.node.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
+            }
             }
 }
