@@ -12,8 +12,10 @@ class GameScene: SKScene {
     public enum EnemyState {
         case STANDBY
         case ATTACKING
+        case KAMIKAZE
         case LOOPING
         case FLEE
+        case RETURN
     }
     
     public struct Enemy
@@ -123,7 +125,7 @@ class GameScene: SKScene {
             var lastEnemy = Enemy()
             for index in 0 ... enemies.count - 1
             {
-                guard enemies[index].node.parent != nil else { continue }
+                guard enemies[index].node.parent != nil && enemies[index].state == EnemyState.STANDBY else { continue }
                 lastEnemy = enemies[index]
                 if Int.random(in: 0..<3) == 1 {
                     counter += 1
