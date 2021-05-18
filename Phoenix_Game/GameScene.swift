@@ -2,13 +2,13 @@ import SpriteKit
 import GameplayKit
 
 class GameScene: SKScene {
-    
+
     public enum GameState {
         case LEVEL1
         case LEVEL2
         case LEVEL3
     }
-    
+
     public enum EnemyState {
         case STANDBY
         case ATTACKING
@@ -17,28 +17,25 @@ class GameScene: SKScene {
         case FLEE
         case RETURN
     }
-    
-    public struct Enemy
-    {
-        var node: SKSpriteNode = SKSpriteNode()
+
+    public struct Enemy {
+        var node: SKSpriteNode
         var initialPos: CGPoint = CGPoint(x: 0, y: 0)
         var state: EnemyState = EnemyState.STANDBY
     }
-    
+
     var ship: SKSpriteNode!
     var enemies: [Enemy]!
-    private var label : SKLabelNode?
-    private var spinnyNode : SKShapeNode?
+    private var label: SKLabelNode?
+    private var spinnyNode: SKShapeNode?
     private var spaceshipTouch: UITouch?
-    var gameState : GameState?
-    var enemiesAttackTimer : Timer?
-    
-    
-    
+    var gameState: GameState?
+    var enemiesAttackTimer: Timer?
+
     override func didMove(to view: SKView) {
-        
+
         gameState = GameState.LEVEL1
-        
+
         let spaceshipYPositon = -(self.size.height / 2) + 150
 
         self.backgroundColor = .black
@@ -47,17 +44,16 @@ class GameScene: SKScene {
         self.ship.size = CGSize(width: 50, height: 55)
         self.ship.position = CGPoint(x: 0, y: spaceshipYPositon)
         self.addChild(self.ship)
-        
+
         self.enemiesAttackTimer = Timer.scheduledTimer(timeInterval: 7,
                                                      target: self,
                                                      selector: #selector(setNewAttackers),
                                                      userInfo: nil,
                                                      repeats: true)
-        
+
         self.addBirds()
     }
-    
-    
+
     override func touchesBegan(_ touches: Set<UITouch>, with _: UIEvent?) {
         guard self.spaceshipTouch == nil
         else {
@@ -99,17 +95,16 @@ class GameScene: SKScene {
 
         self.spaceshipTouch = nil
     }
-    
-    
+
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
         self.cleanPastShoots()
         self.updateBird()
     }
 }
-    
+
     extension GameScene {
-    
+
     func cleanPastShoots() {
         for node in children {
             guard node.name == "shoot" else { continue }
@@ -119,12 +114,10 @@ class GameScene: SKScene {
         }
     }
         @objc
-        func setNewAttackers()
-        {
+        func setNewAttackers() {
             var counter = 0
-            var lastEnemy = Enemy()
-            for index in 0 ... enemies.count - 1
-            {
+            var lastEnemy = Enemy(node: SKSpriteNode())
+            for index in 0 ... enemies.count - 1 {
                 guard enemies[index].node.parent != nil && enemies[index].state == EnemyState.STANDBY else { continue }
                 lastEnemy = enemies[index]
                 if Int.random(in: 0..<3) == 1 {
@@ -133,8 +126,7 @@ class GameScene: SKScene {
                     enemies[index].node.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
                 }
             }
-            if lastEnemy.node.parent != nil && counter == 0
-            {
+            if lastEnemy.node.parent != nil && counter == 0 {
                 lastEnemy.state = EnemyState.ATTACKING
                 lastEnemy.node.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
             }

@@ -13,8 +13,8 @@
 		955A0004263C16420023D8EB /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955A0003263C16420023D8EB /* GameViewController.swift */; };
 		955A0007263C16420023D8EB /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 955A0005263C16420023D8EB /* Main.storyboard */; };
 		955A0009263C166B0023D8EB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 955A0008263C166B0023D8EB /* Assets.xcassets */; };
-		955A0014263C166C0023D8EB /* Phoenix_GameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955A0013263C166C0023D8EB /* Phoenix_GameTests.swift */; };
-		955A001F263C166D0023D8EB /* Phoenix_GameUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955A001E263C166D0023D8EB /* Phoenix_GameUITests.swift */; };
+		955A0014263C166C0023D8EB /* PhoenixGameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955A0013263C166C0023D8EB /* PhoenixGameTests.swift */; };
+		955A001F263C166D0023D8EB /* PhoenixGameUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955A001E263C166D0023D8EB /* PhoenixGameUITests.swift */; };
 		955A0031263C1E610023D8EB /* SwifterSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 955A0030263C1E610023D8EB /* SwifterSwift */; };
 		955AFFFC263C16400023D8EB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955AFFFB263C16400023D8EB /* AppDelegate.swift */; };
 		955AFFFE263C16420023D8EB /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 955AFFFD263C16420023D8EB /* GameScene.sks */; };
@@ -46,10 +46,10 @@
 		955A0008263C166B0023D8EB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		955A000A263C166B0023D8EB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		955A000F263C166C0023D8EB /* Phoenix_GameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Phoenix_GameTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		955A0013263C166C0023D8EB /* Phoenix_GameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Phoenix_GameTests.swift; sourceTree = "<group>"; };
+		955A0013263C166C0023D8EB /* PhoenixGameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoenixGameTests.swift; sourceTree = "<group>"; };
 		955A0015263C166C0023D8EB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		955A001A263C166C0023D8EB /* Phoenix_GameUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Phoenix_GameUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		955A001E263C166D0023D8EB /* Phoenix_GameUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Phoenix_GameUITests.swift; sourceTree = "<group>"; };
+		955A001E263C166D0023D8EB /* PhoenixGameUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoenixGameUITests.swift; sourceTree = "<group>"; };
 		955A0020263C166D0023D8EB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		955AFFF8263C16400023D8EB /* Phoenix_Game.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Phoenix_Game.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		955AFFFB263C16400023D8EB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -87,7 +87,7 @@
 		955A0012263C166C0023D8EB /* Phoenix_GameTests */ = {
 			isa = PBXGroup;
 			children = (
-				955A0013263C166C0023D8EB /* Phoenix_GameTests.swift */,
+				955A0013263C166C0023D8EB /* PhoenixGameTests.swift */,
 				955A0015263C166C0023D8EB /* Info.plist */,
 			);
 			path = Phoenix_GameTests;
@@ -96,7 +96,7 @@
 		955A001D263C166D0023D8EB /* Phoenix_GameUITests */ = {
 			isa = PBXGroup;
 			children = (
-				955A001E263C166D0023D8EB /* Phoenix_GameUITests.swift */,
+				955A001E263C166D0023D8EB /* PhoenixGameUITests.swift */,
 				955A0020263C166D0023D8EB /* Info.plist */,
 			);
 			path = Phoenix_GameUITests;
@@ -185,6 +185,7 @@
 				955AFFF4263C16400023D8EB /* Sources */,
 				955AFFF5263C16400023D8EB /* Frameworks */,
 				955AFFF6263C16400023D8EB /* Resources */,
+				954C0615265431D400CE5B8A /* Run Swiftlint */,
 			);
 			buildRules = (
 			);
@@ -271,12 +272,33 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		954C0615265431D400CE5B8A /* Run Swiftlint */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Run Swiftlint";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		955A000B263C166C0023D8EB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				955A0014263C166C0023D8EB /* Phoenix_GameTests.swift in Sources */,
+				955A0014263C166C0023D8EB /* PhoenixGameTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,7 +306,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				955A001F263C166D0023D8EB /* Phoenix_GameUITests.swift in Sources */,
+				955A001F263C166D0023D8EB /* PhoenixGameUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
