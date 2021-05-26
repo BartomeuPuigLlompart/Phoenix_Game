@@ -19,11 +19,16 @@ class GameScene: SKScene {
     }
 
     public struct Enemy {
-        var node: SKSpriteNode
+        var node: SKSpriteNode = SKSpriteNode()
         var initialPos: CGPoint = CGPoint(x: 0, y: 0)
         var state: EnemyState = EnemyState.STANDBY
+        var flipRad : CGFloat = 0.0
+        var flipCenter = CGPoint(x: 0.0, y: 0.0)
+        var flipAngle : CGFloat = 0.0
     }
-
+    
+    var pastTime = 0.0
+    var dt : CGFloat = 0.03
     var ship: SKSpriteNode!
     var enemies: [Enemy]!
     var enemyAnims: Array<SKAction>!
@@ -101,6 +106,10 @@ class GameScene: SKScene {
         // Called before each frame is rendered
         self.cleanPastShoots()
         self.updateBird()
+        if pastTime != 0.0 {
+            dt = CGFloat(currentTime - pastTime)
+        }
+        pastTime = currentTime
     }
 }
 

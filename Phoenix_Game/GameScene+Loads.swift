@@ -16,22 +16,22 @@ extension GameScene {
     }
 
     func loadL1Enemies() {
-        enemies = [Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: -150, y: self.size.height / 2 - 150), state: EnemyState.STANDBY),
-                   Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: 150, y: self.size.height / 2 - 150), state: EnemyState.STANDBY),
-                   Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: -225, y: self.size.height / 2 - 190), state: EnemyState.STANDBY),
-                   Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: 225, y: self.size.height / 2 - 190), state: EnemyState.STANDBY),
-                   Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: -300, y: self.size.height / 2 - 230), state: EnemyState.STANDBY),
-                   Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: 300, y: self.size.height / 2 - 230), state: EnemyState.STANDBY),
-                   Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: -300, y: self.size.height / 2 - 310), state: EnemyState.STANDBY),
-                   Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: 300, y: self.size.height / 2 - 310), state: EnemyState.STANDBY),
-                   Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: -225, y: self.size.height / 2 - 350), state: EnemyState.STANDBY),
-                   Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: 225, y: self.size.height / 2 - 350), state: EnemyState.STANDBY),
-                   Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: -150, y: self.size.height / 2 - 390), state: EnemyState.STANDBY),
-                   Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: 150, y: self.size.height / 2 - 390), state: EnemyState.STANDBY),
-                   Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: -75, y: self.size.height / 2 - 430), state: EnemyState.STANDBY),
-                   Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: 75, y: self.size.height / 2 - 430), state: EnemyState.STANDBY),
-                   Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: 0, y: self.size.height / 2 - 430), state: EnemyState.STANDBY),
-                   Enemy(node: SKSpriteNode(), initialPos: CGPoint(x: 0, y: self.size.height / 2 - 350), state: EnemyState.STANDBY)]
+        enemies = [Enemy(initialPos: CGPoint(x: -150, y: self.size.height / 2 - 150)),
+                   Enemy(initialPos: CGPoint(x: 150, y: self.size.height / 2 - 150)),
+                   Enemy(initialPos: CGPoint(x: -225, y: self.size.height / 2 - 190)),
+                   Enemy(initialPos: CGPoint(x: 225, y: self.size.height / 2 - 190)),
+                   Enemy(initialPos: CGPoint(x: -300, y: self.size.height / 2 - 230)),
+                   Enemy(initialPos: CGPoint(x: 300, y: self.size.height / 2 - 230)),
+                   Enemy(initialPos: CGPoint(x: -300, y: self.size.height / 2 - 310)),
+                   Enemy(initialPos: CGPoint(x: 300, y: self.size.height / 2 - 310)),
+                   Enemy(initialPos: CGPoint(x: -225, y: self.size.height / 2 - 350)),
+                   Enemy(initialPos: CGPoint(x: 225, y: self.size.height / 2 - 350)),
+                   Enemy(initialPos: CGPoint(x: -150, y: self.size.height / 2 - 390)),
+                   Enemy(initialPos: CGPoint(x: 150, y: self.size.height / 2 - 390)),
+                   Enemy(initialPos: CGPoint(x: -75, y: self.size.height / 2 - 430)),
+                   Enemy(initialPos: CGPoint(x: 75, y: self.size.height / 2 - 430)),
+                   Enemy(initialPos: CGPoint(x: 0, y: self.size.height / 2 - 430)),
+                   Enemy(initialPos: CGPoint(x: 0, y: self.size.height / 2 - 350))]
         let animationCount = 6
         let enemyAnimatedAtlas = SKTextureAtlas(named: "enemy_\(1)")
         var animationsAtr: [(texName: String, texNum: Int, timePerFrame: Double)] =
@@ -41,10 +41,8 @@ extension GameScene {
              ("enemy_1_1_spawn_", 4, 0.3)]
         enemyAnims = Array(repeating: SKAction(), count: animationCount)
         var fleeFrames = Array(repeating: SKTexture(), count: 7)
-        for anim in 0 ... animationsAtr.count-1{
+        for anim in 0 ... animationsAtr.count-1 {
             var moveFrames: [SKTexture] = []
-            
-            //var moveFrames: [SKTexture] = []
             for index in 1 ... animationsAtr[anim].texNum {
                 let enemyTextureName = animationsAtr[anim].texName + "\(index)"// enemy_1_1_static_1
                 moveFrames.append(enemyAnimatedAtlas.textureNamed(enemyTextureName))
@@ -91,12 +89,11 @@ extension GameScene {
             enemy.physicsBody?.collisionBitMask = 0
             enemy.name = "enemy_\(1)_\(1)"
             enemy.physicsBody?.affectedByGravity = false
-            //STATIC
-            
             for index in 0 ... enemies.count - 1 {
                 guard let enemyNode = enemy.copy() as? SKSpriteNode else { continue}
                 self.enemies[index].node = enemyNode
                 self.enemies[index].node.position = self.enemies[index].initialPos
+                self.enemies[index].flipRad = 200
                 self.addChild(self.enemies[index].node)
                 self.enemies[index].node.run(enemyAnims[3])
             }
