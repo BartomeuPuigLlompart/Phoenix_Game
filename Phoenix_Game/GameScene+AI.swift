@@ -9,6 +9,27 @@ import Foundation
 import SpriteKit
 
 extension GameScene {
+    @objc
+    func enemyShoot(sender: Timer) {
+        guard let enemyStruct = sender.userInfo as? Enemy else { return}
+        if enemyStruct.node != nil
+        {
+            let sprite = SKSpriteNode(imageNamed: "Shoot")
+            sprite.position = enemyStruct.node.position
+            sprite.name = "bomb"
+            sprite.zPosition = 1
+            sprite.size = CGSize(width: sprite.size.width, height: sprite.size.height * 3)
+            addChild(sprite)
+            sprite.physicsBody = SKPhysicsBody(texture: sprite.texture!, size: sprite.size)
+            sprite.physicsBody?.affectedByGravity = false
+            sprite.physicsBody?.linearDamping = 0
+            sprite.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
+            sprite.physicsBody?.contactTestBitMask = 0x0000_0100
+            sprite.physicsBody?.collisionBitMask = 0
+            Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 5..<20), target: self, selector:#selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats:false)
+        }
+    }
+    
     func updateBird() {
         for idx in 0 ... enemies.count - 1 {
             guard enemies[idx].node.parent != nil else { continue }
@@ -18,18 +39,19 @@ extension GameScene {
                 let xAim = xDiff / abs(xDiff) * 100
                 enemies[idx].node.physicsBody?.velocity = CGVector(dx: xAim, dy: -500)
                 if enemies[idx].node.position.y < (enemies[idx].initialPos.y - (self.size.height / 2)) {
-                    if Int.random(in: 0..<2) == 1 {
-                        if Int.random(in: 0..<2) == 1 {
+                    if Int.random(in: 0..<3) == 1 {
                         enemies[idx].node.physicsBody?.velocity = CGVector(dx: -100, dy: 0)
                         enemies[idx].state = EnemyState.FLEE
                         self.enemies[idx].node.run(enemyAnims[0])
-                        } else {
-                            enemies[idx].node.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
-                            enemies[idx].state = EnemyState.LOOPING
-                            enemies[idx].flipCenter = CGPoint(x: enemies[idx].flipRad, y: enemies[idx].node.position.y)
-                            enemies[idx].flipAngle = CGFloat.pi
-                        }
-                    } else {
+                    } else if Int.random(in: 0..<2) == 1 {
+                        enemies[idx].node.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
+                        enemies[idx].state = EnemyState.LOOPING
+                        enemies[idx].flipCenter = CGPoint(x: enemies[idx].flipRad, y: enemies[idx].node.position.y)
+                        enemies[idx].flipAngle = CGFloat.pi
+                        enemies[idx].node.removeAllActions()
+                        enemies[idx].node.texture = SKTexture(imageNamed: "enemy_1_1_flip_1")
+                    }
+                    else {
                         enemies[idx].state = EnemyState.KAMIKAZE
                     }
                 }
@@ -55,8 +77,10 @@ extension GameScene {
                 enemies[idx].node.position.x = enemies[idx].flipCenter.x + cos(enemies[idx].flipAngle) * enemies[idx].flipRad
                 enemies[idx].node.position.y = enemies[idx].flipCenter.y + sin(enemies[idx].flipAngle) * enemies[idx].flipRad
                 enemies[idx].flipAngle += (self.dt * 3.5)
+                enemies[idx].node.zRotation = enemies[idx].flipAngle + CGFloat.pi
                 if enemies[idx].flipAngle > (CGFloat.pi * 3)
                 {
+                    enemies[idx].node.zRotation = 0.0
                     enemies[idx].node.position = CGPoint(x: enemies[idx].flipCenter.x - enemies[idx].flipRad, y: enemies[idx].flipCenter.y)
                     if Int.random(in: 0..<2) == 1 {
                         enemies[idx].node.physicsBody?.velocity = CGVector(dx: -100, dy: 0)
@@ -66,6 +90,7 @@ extension GameScene {
                     else {
                         enemies[idx].state = EnemyState.KAMIKAZE
                         enemies[idx].node.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
+                        enemies[idx].node.run(enemyAnims[1])
                     }
                 }
             case EnemyState.FLEE, .RETURN:

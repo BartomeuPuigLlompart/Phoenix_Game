@@ -6,6 +6,7 @@ extension GameScene {
         let sprite = SKSpriteNode(imageNamed: "Shoot")
         sprite.position = self.ship.position
         sprite.name = "shoot"
+        sprite.size = CGSize(width: sprite.size.width, height: sprite.size.height * 3)
         sprite.zPosition = 1
         addChild(sprite)
         sprite.physicsBody = SKPhysicsBody(texture: sprite.texture!, size: sprite.size)
@@ -96,6 +97,7 @@ extension GameScene {
                 self.enemies[index].flipRad = 200
                 self.addChild(self.enemies[index].node)
                 self.enemies[index].node.run(enemyAnims[3])
+                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 5..<20), target: self, selector:#selector(enemyShoot(sender:)), userInfo: self.enemies[index], repeats:false)
             }
         default:
             return
