@@ -22,16 +22,18 @@ class GameScene: SKScene {
         var node: SKSpriteNode = SKSpriteNode()
         var initialPos: CGPoint = CGPoint(x: 0, y: 0)
         var state: EnemyState = EnemyState.STANDBY
-        var flipRad : CGFloat = 0.0
+        var flipRad: CGFloat = 0.0
         var flipCenter = CGPoint(x: 0.0, y: 0.0)
-        var flipAngle : CGFloat = 0.0
+        var flipAngle: CGFloat = 0.0
     }
-    
+
     var pastTime = 0.0
-    var dt : CGFloat = 0.03
+    var dt: CGFloat = 0.03
+    var score: Int = 0
+    var scoreLabel: SKLabelNode!
     var ship: SKSpriteNode!
     var enemies: [Enemy]!
-    var enemyAnims: Array<SKAction>!
+    var enemyAnims: [SKAction]!
     private var label: SKLabelNode?
     private var spinnyNode: SKShapeNode?
     private var spaceshipTouch: UITouch?
@@ -56,8 +58,12 @@ class GameScene: SKScene {
                                                      selector: #selector(setNewAttackers),
                                                      userInfo: nil,
                                                      repeats: true)
-
+        
+        self.scoreLabel = SKLabelNode(text: "SCORE: 0")
+        self.scoreLabel.position = CGPoint(x: 0, y: (self.size.height / 2) - 130)
+        self.addChild(self.scoreLabel)
         self.addBirds()
+        self.physicsWorld.contactDelegate = self
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with _: UIEvent?) {
@@ -104,12 +110,12 @@ class GameScene: SKScene {
 
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
-        self.cleanPastShoots()
         self.updateBird()
         if pastTime != 0.0 {
             dt = CGFloat(currentTime - pastTime)
         }
         pastTime = currentTime
+        self.cleanPastShoots()
     }
 }
 
@@ -117,7 +123,7 @@ class GameScene: SKScene {
 
     func cleanPastShoots() {
         for node in children {
-            guard node.name == "shoot" else { continue }
+            guard node.name == "shoot" || node.name == "bomb"  else { continue }
             if node.position.y > (self.size.height / 2) || node.position.y < -(self.size.height / 2) {
                 node.removeFromParent()
             }

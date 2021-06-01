@@ -14,25 +14,46 @@ extension GameScene {
         sprite.physicsBody?.affectedByGravity = false
         sprite.physicsBody?.linearDamping = 0
         sprite.physicsBody?.contactTestBitMask = 0x0000_0101
+        sprite.physicsBody?.collisionBitMask = 0
+    }
+    
+    @objc
+    func enemyShoot(sender: Timer) {
+        guard let enemyStruct = sender.userInfo as? Enemy else { return}
+        if enemyStruct.node.parent != nil {
+            let sprite = SKSpriteNode(imageNamed: "Shoot")
+            sprite.position = enemyStruct.node.position
+            sprite.name = "bomb"
+            sprite.zPosition = 1
+            sprite.size = CGSize(width: sprite.size.width, height: sprite.size.height * 3)
+            addChild(sprite)
+            sprite.physicsBody = SKPhysicsBody(texture: sprite.texture!, size: sprite.size)
+            sprite.physicsBody?.affectedByGravity = false
+            sprite.physicsBody?.linearDamping = 0
+            sprite.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
+            sprite.physicsBody?.contactTestBitMask = 0x0000_0100
+            sprite.physicsBody?.collisionBitMask = 0
+            Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 5..<20), target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
+        }
     }
 
     func loadL1Enemies() {
-        enemies = [Enemy(initialPos: CGPoint(x: -150, y: self.size.height / 2 - 150)),
-                   Enemy(initialPos: CGPoint(x: 150, y: self.size.height / 2 - 150)),
-                   Enemy(initialPos: CGPoint(x: -225, y: self.size.height / 2 - 190)),
-                   Enemy(initialPos: CGPoint(x: 225, y: self.size.height / 2 - 190)),
-                   Enemy(initialPos: CGPoint(x: -300, y: self.size.height / 2 - 230)),
-                   Enemy(initialPos: CGPoint(x: 300, y: self.size.height / 2 - 230)),
-                   Enemy(initialPos: CGPoint(x: -300, y: self.size.height / 2 - 310)),
-                   Enemy(initialPos: CGPoint(x: 300, y: self.size.height / 2 - 310)),
-                   Enemy(initialPos: CGPoint(x: -225, y: self.size.height / 2 - 350)),
-                   Enemy(initialPos: CGPoint(x: 225, y: self.size.height / 2 - 350)),
-                   Enemy(initialPos: CGPoint(x: -150, y: self.size.height / 2 - 390)),
-                   Enemy(initialPos: CGPoint(x: 150, y: self.size.height / 2 - 390)),
-                   Enemy(initialPos: CGPoint(x: -75, y: self.size.height / 2 - 430)),
-                   Enemy(initialPos: CGPoint(x: 75, y: self.size.height / 2 - 430)),
-                   Enemy(initialPos: CGPoint(x: 0, y: self.size.height / 2 - 430)),
-                   Enemy(initialPos: CGPoint(x: 0, y: self.size.height / 2 - 350))]
+        enemies = [Enemy(initialPos: CGPoint(x: -150, y: self.size.height / 2.5 - 150)),
+                   Enemy(initialPos: CGPoint(x: 150, y: self.size.height / 2.5 - 150)),
+                   Enemy(initialPos: CGPoint(x: -225, y: self.size.height / 2.5 - 190)),
+                   Enemy(initialPos: CGPoint(x: 225, y: self.size.height / 2.5 - 190)),
+                   Enemy(initialPos: CGPoint(x: -300, y: self.size.height / 2.5 - 230)),
+                   Enemy(initialPos: CGPoint(x: 300, y: self.size.height / 2.5 - 230)),
+                   Enemy(initialPos: CGPoint(x: -300, y: self.size.height / 2.5 - 310)),
+                   Enemy(initialPos: CGPoint(x: 300, y: self.size.height / 2.5 - 310)),
+                   Enemy(initialPos: CGPoint(x: -225, y: self.size.height / 2.5 - 350)),
+                   Enemy(initialPos: CGPoint(x: 225, y: self.size.height / 2.5 - 350)),
+                   Enemy(initialPos: CGPoint(x: -150, y: self.size.height / 2.5 - 390)),
+                   Enemy(initialPos: CGPoint(x: 150, y: self.size.height / 2.5 - 390)),
+                   Enemy(initialPos: CGPoint(x: -75, y: self.size.height / 2.5 - 430)),
+                   Enemy(initialPos: CGPoint(x: 75, y: self.size.height / 2.5 - 430)),
+                   Enemy(initialPos: CGPoint(x: 0, y: self.size.height / 2.5 - 430)),
+                   Enemy(initialPos: CGPoint(x: 0, y: self.size.height / 2.5 - 350))]
         let animationCount = 6
         let enemyAnimatedAtlas = SKTextureAtlas(named: "enemy_\(1)")
         var animationsAtr: [(texName: String, texNum: Int, timePerFrame: Double)] =
@@ -55,8 +76,7 @@ extension GameScene {
                                                                         restore: true))
                 fleeFrames[anim] = SKTexture(imageNamed: "enemy_1_1_flee_\(anim+1)")
                 fleeFrames[anim+3] = SKTexture(imageNamed: "enemy_1_1_flee_\(anim+4)")
-            }
-            else {
+            } else {
                 enemyAnims[anim] = SKAction.sequence([SKAction.animate(
                                                         with: moveFrames,
                                                         timePerFrame: animationsAtr[anim].timePerFrame,
@@ -97,7 +117,7 @@ extension GameScene {
                 self.enemies[index].flipRad = 200
                 self.addChild(self.enemies[index].node)
                 self.enemies[index].node.run(enemyAnims[3])
-                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 5..<20), target: self, selector:#selector(enemyShoot(sender:)), userInfo: self.enemies[index], repeats:false)
+                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 5..<20), target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.enemies[index], repeats: false)
             }
         default:
             return

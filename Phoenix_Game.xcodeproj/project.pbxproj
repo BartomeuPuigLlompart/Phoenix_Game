@@ -19,6 +19,7 @@
 		955AFFFC263C16400023D8EB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955AFFFB263C16400023D8EB /* AppDelegate.swift */; };
 		955AFFFE263C16420023D8EB /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 955AFFFD263C16420023D8EB /* GameScene.sks */; };
 		959BF6D12649A153007933C1 /* GameScene+AI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 959BF6D02649A153007933C1 /* GameScene+AI.swift */; };
+		EF53D94A26669F63004F3DD4 /* GameScene+ContactDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF53D94926669F63004F3DD4 /* GameScene+ContactDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,7 @@
 		955AFFFD263C16420023D8EB /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
 		955AFFFF263C16420023D8EB /* Actions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Actions.sks; sourceTree = "<group>"; };
 		959BF6D02649A153007933C1 /* GameScene+AI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+AI.swift"; sourceTree = "<group>"; };
+		EF53D94926669F63004F3DD4 /* GameScene+ContactDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+ContactDelegate.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,6 +133,7 @@
 				955A0001263C16420023D8EB /* GameScene.swift */,
 				953DF3862644587E00DC8189 /* GameScene+Loads.swift */,
 				959BF6D02649A153007933C1 /* GameScene+AI.swift */,
+				EF53D94926669F63004F3DD4 /* GameScene+ContactDelegate.swift */,
 				955A0003263C16420023D8EB /* GameViewController.swift */,
 				955A0005263C16420023D8EB /* Main.storyboard */,
 				955A0008263C166B0023D8EB /* Assets.xcassets */,
@@ -316,6 +319,7 @@
 			files = (
 				955A0002263C16420023D8EB /* GameScene.swift in Sources */,
 				955A0004263C16420023D8EB /* GameViewController.swift in Sources */,
+				EF53D94A26669F63004F3DD4 /* GameScene+ContactDelegate.swift in Sources */,
 				953DF3872644587E00DC8189 /* GameScene+Loads.swift in Sources */,
 				955AFFFC263C16400023D8EB /* AppDelegate.swift in Sources */,
 				959BF6D12649A153007933C1 /* GameScene+AI.swift in Sources */,
