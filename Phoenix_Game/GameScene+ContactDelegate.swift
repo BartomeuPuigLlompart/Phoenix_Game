@@ -24,8 +24,19 @@ extension GameScene: SKPhysicsContactDelegate {
         if oneNodeIsEnemy, oneNodeIsShoot {
             nodeA.removeFromParent()
             nodeB.removeFromParent()
-
-            self.score += 1
+            let enemy = nameA.hasPrefix("enemy") ? nodeA : nodeB
+            var addedScore = 0
+            guard let enemyNum = (enemy.name?[(enemy.name?.index(enemy.name!.startIndex, offsetBy: 6))!]) else {return}
+            switch enemyNum {
+            case "1":
+                let diagonalSpeed: Double = 600
+                let enemySpeed = (simd_length(_: simd_double2(x: Double(enemy.physicsBody?.velocity.dx ?? 0), y: Double(enemy.physicsBody?.velocity.dy ?? 0))))
+                addedScore = enemySpeed > diagonalSpeed ? (Int.random(in: 1..<25) * 10) : 20
+            default:
+                return
+            }
+            print(addedScore)
+            self.score += addedScore
             self.scoreLabel.text = "SCORE: \(self.score)"
             return
         }
@@ -33,8 +44,6 @@ extension GameScene: SKPhysicsContactDelegate {
         if oneNodeIsBomb, oneNodeIsShip {
             nodeA.removeFromParent()
             nodeB.removeFromParent()
-
-            self.score += 1
             self.scoreLabel.text = "GAME OVER"
             return
         }

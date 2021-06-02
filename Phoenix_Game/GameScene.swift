@@ -28,7 +28,7 @@ class GameScene: SKScene {
     }
 
     var pastTime = 0.0
-    var dt: CGFloat = 0.03
+    var deltaTime: CGFloat = 0.03
     var score: Int = 0
     var scoreLabel: SKLabelNode!
     var ship: SKSpriteNode!
@@ -53,7 +53,7 @@ class GameScene: SKScene {
         self.ship.position = CGPoint(x: 0, y: spaceshipYPositon)
         self.addChild(self.ship)
 
-        self.enemiesAttackTimer = Timer.scheduledTimer(timeInterval: 7,
+        self.enemiesAttackTimer = Timer.scheduledTimer(timeInterval: 3,
                                                      target: self,
                                                      selector: #selector(setNewAttackers),
                                                      userInfo: nil,
@@ -112,7 +112,7 @@ class GameScene: SKScene {
         // Called before each frame is rendered
         self.updateBird()
         if pastTime != 0.0 {
-            dt = CGFloat(currentTime - pastTime)
+            deltaTime = CGFloat(currentTime - pastTime)
         }
         pastTime = currentTime
         self.cleanPastShoots()
@@ -132,10 +132,10 @@ class GameScene: SKScene {
         @objc
         func setNewAttackers() {
             var counter = 0
-            var lastEnemy = Enemy(node: SKSpriteNode())
+            var lastEnemy: Int = -1
             for index in 0 ... enemies.count - 1 {
                 guard enemies[index].node.parent != nil && enemies[index].state == EnemyState.STANDBY else { continue }
-                lastEnemy = enemies[index]
+                lastEnemy = Int(index)
                 if Int.random(in: 0..<3) == 1 {
                     counter += 1
                     enemies[index].state = EnemyState.ATTACKING
@@ -143,10 +143,10 @@ class GameScene: SKScene {
                     enemies[index].node.run(enemyAnims[1])
                 }
             }
-            if lastEnemy.node.parent != nil && counter == 0 {
-                lastEnemy.state = EnemyState.ATTACKING
-                lastEnemy.node.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
-                lastEnemy.node.run(enemyAnims[1])
+            if lastEnemy != -1 && counter == 0 {
+                enemies[lastEnemy].state = EnemyState.ATTACKING
+                enemies[lastEnemy].node.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
+                enemies[lastEnemy].node.run(enemyAnims[1])
             }
             }
 }

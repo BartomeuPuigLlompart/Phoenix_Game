@@ -17,7 +17,7 @@ extension GameScene {
             switch enemies[idx].state {
             case EnemyState.ATTACKING:
                 let xDiff = self.ship.position.x - enemies[idx].node.position.x
-                let xAim = xDiff / abs(xDiff) * 100
+                let xAim = xDiff / abs(xDiff) * 200
                 enemies[idx].node.physicsBody?.velocity = CGVector(dx: xAim, dy: -500)
                 if enemies[idx].node.position.y < ((enemies[idx].initialPos.y + self.ship.position.y) / 2) {
                     if Int.random(in: 0..<3) == 1 {
@@ -37,7 +37,7 @@ extension GameScene {
                 }
             case .KAMIKAZE:
                 let xDiff = self.ship.position.x - enemies[idx].node.position.x
-                let xAim = xDiff / abs(xDiff) * 100
+                let xAim = xDiff / abs(xDiff) * 200
                 enemies[idx].node.physicsBody?.velocity = CGVector(dx: xAim, dy: -500)
                 if enemies[idx].node.position.y < self.ship.position.y {
                     if Int.random(in: 0..<2) == 1 {
@@ -56,7 +56,7 @@ extension GameScene {
             case EnemyState.LOOPING:
                 enemies[idx].node.position.x = enemies[idx].flipCenter.x + cos(enemies[idx].flipAngle) * enemies[idx].flipRad
                 enemies[idx].node.position.y = enemies[idx].flipCenter.y + sin(enemies[idx].flipAngle) * enemies[idx].flipRad
-                enemies[idx].flipAngle += (self.dt * 3.5)
+                enemies[idx].flipAngle += (self.deltaTime * 3.5)
                 enemies[idx].node.zRotation = enemies[idx].flipAngle + CGFloat.pi
                 if enemies[idx].flipAngle > (CGFloat.pi * 3) {
                     enemies[idx].node.zRotation = 0.0
@@ -72,13 +72,15 @@ extension GameScene {
                     }
                 }
             case EnemyState.FLEE, .RETURN:
-                if enemies[idx].node.position.x < (enemies[idx].initialPos.x - (self.size.width / 3)) {
+                let diagonalSpeed: Double = 600
+                let enemySpeed = (simd_length(_: simd_double2(x: Double(enemies[idx].node.physicsBody?.velocity.dx ?? 0), y: Double(enemies[idx].node.physicsBody?.velocity.dy ?? 0))))
+                if enemies[idx].state == .FLEE && enemies[idx].node.position.x < (enemies[idx].initialPos.x - (self.size.width / 3)) {
                     var rDir = CGVector(dx: (enemies[idx].initialPos.x + (self.size.width / 3)) - enemies[idx].node.position.x, dy: (enemies[idx].initialPos.y - enemies[idx].node.position.y) / 2.0)
                     rDir = CGVector(dx: simd_normalize(simd_double2(x: Double(rDir.dx), y: Double(rDir.dy))).x * 750.0,
                                                dy: simd_normalize(simd_double2(x: Double(rDir.dx), y: Double(rDir.dy))).y * 750.0)
                     enemies[idx].node.physicsBody?.velocity = rDir
                     self.enemies[idx].node.run(enemyAnims[4])
-                } else if enemies[idx].node.position.x > (enemies[idx].initialPos.x + (self.size.width / 3)) {
+                } else if enemies[idx].state == .FLEE && enemies[idx].node.position.x > (enemies[idx].initialPos.x + (self.size.width / 3)) && enemySpeed > diagonalSpeed {
                     var returnDirection = CGVector(dx: enemies[idx].initialPos.x - enemies[idx].node.position.x, dy: enemies[idx].initialPos.y - enemies[idx].node.position.y)
                     returnDirection = CGVector(dx: simd_normalize(simd_double2(x: Double(returnDirection.dx), y: Double(returnDirection.dy))).x * 750.0,
                                                dy: simd_normalize(simd_double2(x: Double(returnDirection.dx), y: Double(returnDirection.dy))).y * 750.0)
@@ -93,15 +95,6 @@ extension GameScene {
 
             default:
                 continue
-            }
-            if enemies[idx].node.position.y < -(self.size.height / 2)
-            {
-                enemies[idx].state = EnemyState.RETURN
-                var returnDirection = CGVector(dx: enemies[idx].initialPos.x - enemies[idx].node.position.x, dy: enemies[idx].initialPos.y - enemies[idx].node.position.y)
-                returnDirection = CGVector(dx: simd_normalize(simd_double2(x: Double(returnDirection.dx), y: Double(returnDirection.dy))).x * 500.0,
-                                           dy: simd_normalize(simd_double2(x: Double(returnDirection.dx), y: Double(returnDirection.dy))).y * 500.0)
-                enemies[idx].node.physicsBody?.velocity = returnDirection
-                self.enemies[idx].node.run(enemyAnims[2])
             }
         }
         if !stillAlive {
