@@ -30,7 +30,8 @@ extension GameScene {
                         enemies[idx].flipCenter = CGPoint(x: enemies[idx].flipRad, y: enemies[idx].node.position.y)
                         enemies[idx].flipAngle = CGFloat.pi
                         enemies[idx].node.removeAllActions()
-                        enemies[idx].node.texture = SKTexture(imageNamed: "enemy_1_1_flip_1")
+                        guard let enemyNum = (enemies[idx].node.name?[(enemies[idx].node.name?.index(enemies[idx].node.name!.startIndex, offsetBy: 8))!]) else {continue}
+                        enemies[idx].node.texture = SKTexture(imageNamed: "enemy_1_\(enemyNum)_flip_1")
                     } else {
                         enemies[idx].state = EnemyState.KAMIKAZE
                     }
@@ -97,8 +98,15 @@ extension GameScene {
                 continue
             }
         }
-        if !stillAlive {
-            self.scoreLabel.text = "You Win"
+        if !stillAlive && self.changeLevelTimer == nil {
+            //self.scoreLabel.text = "You Win"
+            gameState = gameState == .LEVEL1 ? .LEVEL2 : .LEVEL3
+            self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
+                                                         target: self,
+                                                         selector: #selector(addBirds),
+                                                         userInfo: nil,
+                                                         repeats: false)
+            self.enemiesAttackTimer!.invalidate()
         }
     }
 }

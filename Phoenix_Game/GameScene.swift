@@ -7,6 +7,8 @@ class GameScene: SKScene {
         case LEVEL1
         case LEVEL2
         case LEVEL3
+        case LEVEL4
+        case LEVEL5
     }
 
     public enum EnemyState {
@@ -39,6 +41,7 @@ class GameScene: SKScene {
     private var spaceshipTouch: UITouch?
     var gameState: GameState?
     var enemiesAttackTimer: Timer?
+    var changeLevelTimer: Timer?
 
     override func didMove(to view: SKView) {
 
@@ -52,13 +55,6 @@ class GameScene: SKScene {
         self.ship.size = CGSize(width: 50, height: 55)
         self.ship.position = CGPoint(x: 0, y: spaceshipYPositon)
         self.addChild(self.ship)
-
-        self.enemiesAttackTimer = Timer.scheduledTimer(timeInterval: 3,
-                                                     target: self,
-                                                     selector: #selector(setNewAttackers),
-                                                     userInfo: nil,
-                                                     repeats: true)
-        
         self.scoreLabel = SKLabelNode(text: "SCORE: 0")
         self.scoreLabel.position = CGPoint(x: 0, y: (self.size.height / 2) - 130)
         self.addChild(self.scoreLabel)
