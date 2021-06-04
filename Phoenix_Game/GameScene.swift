@@ -33,6 +33,10 @@ class GameScene: SKScene {
     var deltaTime: CGFloat = 0.03
     var score: Int = 0
     var scoreLabel: SKLabelNode!
+    var attackingEnemiesCounter: Int = 0
+    var attackingEnemiesLimit: Int = 0
+    var greenFlag: Bool = false
+    var shipRateOfFire: Bool = true
     var ship: SKSpriteNode!
     var enemies: [Enemy]!
     var enemyAnims: [SKAction]!
@@ -60,12 +64,16 @@ class GameScene: SKScene {
         self.addChild(self.scoreLabel)
         self.addBirds()
         self.physicsWorld.contactDelegate = self
+        Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with _: UIEvent?) {
         guard self.spaceshipTouch == nil
         else {
+            if !self.shipRateOfFire {return}
             self.shoot()
+            self.shipRateOfFire = false
+            Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(setShipGreenFlag), userInfo: nil, repeats: false)
             return
         }
 
@@ -125,24 +133,13 @@ class GameScene: SKScene {
             }
         }
     }
-        @objc
-        func setNewAttackers() {
-            var counter = 0
-            var lastEnemy: Int = -1
-            for index in 0 ... enemies.count - 1 {
-                guard enemies[index].node.parent != nil && enemies[index].state == EnemyState.STANDBY else { continue }
-                lastEnemy = Int(index)
-                if Int.random(in: 0..<3) == 1 {
-                    counter += 1
-                    enemies[index].state = EnemyState.ATTACKING
-                    enemies[index].node.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
-                    enemies[index].node.run(enemyAnims[1])
-                }
-            }
-            if lastEnemy != -1 && counter == 0 {
-                enemies[lastEnemy].state = EnemyState.ATTACKING
-                enemies[lastEnemy].node.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
-                enemies[lastEnemy].node.run(enemyAnims[1])
-            }
-            }
+        
+        @objc func setGreenFlag()
+        {
+            greenFlag = true
+        }
+        @objc func setShipGreenFlag()
+        {
+            shipRateOfFire = true
+        }
 }

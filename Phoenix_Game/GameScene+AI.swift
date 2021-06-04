@@ -9,6 +9,24 @@ import Foundation
 import SpriteKit
 
 extension GameScene {
+    @objc
+    func setNewAttackers(sender: Timer) {
+        guard var idx = sender.userInfo as? Int else { return}
+        if self.enemies[idx].node.parent != nil{
+        var range: Int = gameState == .LEVEL1 ? 70 : 90
+            if greenFlag && self.attackingEnemiesCounter < self.attackingEnemiesLimit && self.enemies[idx].state == .STANDBY && Int.random(in: 0..<101) < (range) {
+                self.enemies[idx].state = EnemyState.ATTACKING
+                self.enemies[idx].node.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
+                self.enemies[idx].node.run(enemyAnims[1])
+                self.attackingEnemiesCounter += 1
+                self.greenFlag = false
+                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 10..<16), target: self, selector: #selector(setNewAttackers(sender:)), userInfo: idx, repeats: false)
+                Timer.scheduledTimer(timeInterval: TimeInterval(self.deltaTime * 20), target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
+            }
+            Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 1..<4), target: self, selector: #selector(setNewAttackers(sender:)), userInfo: idx, repeats: false)
+        }
+    }
+    
     func updateBird() {
         var stillAlive = false
         for idx in 0 ... enemies.count - 1 {
@@ -92,6 +110,7 @@ extension GameScene {
                     enemies[idx].node.position = enemies[idx].initialPos
                     enemies[idx].state = EnemyState.STANDBY
                     self.enemies[idx].node.run(enemyAnims[0])
+                    self.attackingEnemiesCounter -= 1
                 }
 
             default:
@@ -106,7 +125,9 @@ extension GameScene {
                                                          selector: #selector(addBirds),
                                                          userInfo: nil,
                                                          repeats: false)
-            self.enemiesAttackTimer!.invalidate()
+            self.attackingEnemiesCounter = 0
+            self.greenFlag = false
+            Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
         }
     }
 }
