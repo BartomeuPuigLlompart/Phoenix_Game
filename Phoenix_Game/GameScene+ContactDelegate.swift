@@ -12,7 +12,6 @@ extension GameScene: SKPhysicsContactDelegate {
     func didBegin(_ contact: SKPhysicsContact) {
         guard let nodeA = contact.bodyA.node else { return }
         guard let nodeB = contact.bodyB.node else { return }
-
         guard let nameA = nodeA.name, let nameB = nodeB.name else { return }
 
         let oneNodeIsEnemy = nameA.hasPrefix("enemy") || nameB.hasPrefix("enemy")
@@ -22,7 +21,7 @@ extension GameScene: SKPhysicsContactDelegate {
         
 
         if oneNodeIsEnemy, oneNodeIsShoot {
-            let enemy = nameA.hasPrefix("enemy") ? nodeA : nodeB
+            guard let enemy = (nameA.hasPrefix("enemy") ? nodeA : nodeB) as? SKSpriteNode else {return}
             let shoot = nameA == "shoot" ? nodeA : nodeB
             var addedScore = 0
             guard let enemyNum = (enemy.name?[(enemy.name?.index(enemy.name!.startIndex, offsetBy: 6))!]) else {return}
@@ -33,42 +32,41 @@ extension GameScene: SKPhysicsContactDelegate {
                 addedScore = enemySpeed > diagonalSpeed ? (Int.random(in: 1..<25) * 10) : 20
                 enemy.removeFromParent()
             case "2":
-                var offsetHit: CGFloat = 16
-                
-                if abs(enemy.position.x - shoot.position.x) < offsetHit
-                {
+                let offsetHit: CGFloat = 16
+                guard var bounce = enemy.physicsBody?.restitution else {return}
+                if abs(enemy.position.x - shoot.position.x) < offsetHit {
                     addedScore = 20
                     //enemy.removeFromParent()
                     print("middle")
-                }
-                else if enemy.physicsBody?.restitution != 0.2 && shoot.position.x < enemy.position.x
-                    {
-                    if enemy.physicsBody?.restitution == 0
-                    {
+                } else if CGFloat(round(10*bounce)/10) != 0.2 && shoot.position.x < enemy.position.x {
+                    if CGFloat(round(10*bounce)/10) == 0 {
                         print("left")
-                        enemy.run(enemyAnims[2])
-                        enemy.physicsBody?.restitution = 0.2
-                    }
-                    else if enemy.physicsBody?.restitution == 0.2
-                    {
+                        enemy.run(SKAction.repeatForever(enemyAnims[2]))
+                        bounce = 0.2
+                    } else if CGFloat(round(10*bounce)/10) == 0.3 {
                         print("both")
-                        enemy.run(enemyAnims[0])
-                        enemy.physicsBody?.restitution = 0.1
-                    }
-                    }
-                else if enemy.physicsBody?.restitution != 0.3{
-                    if enemy.physicsBody?.restitution == 0
-                    {
+                        enemy.run(SKAction.repeatForever(enemyAnims[0]))
+                        bounce = 0.1 }
+                } else if CGFloat(round(10*bounce)/10) != 0.3 {
+                    if CGFloat(round(10*bounce)/10) == 0 {
                         print("right")
-                        enemy.run(enemyAnims[3])
-                        enemy.physicsBody?.restitution = 0.3
-                    }
-                    else if enemy.physicsBody?.restitution == 0.3{
+                        enemy.run(SKAction.repeatForever(enemyAnims[3]))
+                        bounce = 0.3
+                    } else if CGFloat(round(10*bounce)/10) == 0.2 {
                         print("both")
-                        enemy.run(enemyAnims[0])
-                        enemy.physicsBody?.restitution = 0.1
+                        enemy.run(SKAction.repeatForever(enemyAnims[0]))
+                        bounce = 0.1
                     }
                     }
+                if addedScore == 0 {
+                enemy.size = self.largeSize
+                enemy.physicsBody = SKPhysicsBody(texture: enemy.texture!, size: enemy.size)
+                enemy.physicsBody?.restitution = bounce
+                enemy.physicsBody?.categoryBitMask = 0x0000_0001
+                enemy.physicsBody?.contactTestBitMask = 0x0000_0111
+                enemy.physicsBody?.collisionBitMask = 0
+                enemy.physicsBody?.affectedByGravity = false
+                }
             default:
                 return
             }

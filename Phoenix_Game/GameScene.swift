@@ -49,6 +49,8 @@ class GameScene: SKScene {
     var ship: SKSpriteNode!
     var enemies: [Enemy]!
     var enemyAnims: [SKAction]!
+    let largeSize: CGSize = CGSize(width: 48*4, height: 16*4)
+    let shortSize: CGSize = CGSize(width: 25*4, height: 16*4)
     private var label: SKLabelNode?
     private var spinnyNode: SKShapeNode?
     private var spaceshipTouch: UITouch?

@@ -44,6 +44,7 @@ extension GameScene {
                 break
             }
             print("Bounce: \(bounce)")
+            print("State: \(enemies[idx].state)")
             Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(setNewPhoenixAnim(sender:)), userInfo: idx, repeats: false)
             switch self.enemies[idx].state {
             case .EGGSPAWN:
@@ -66,20 +67,29 @@ extension GameScene {
                 
                 if randValue == 0 {
                     if(self.enemies[idx].state == .SHORT) { return }
-                enemies[idx].node.texture = SKTexture(imageNamed: "enemy_2_\(enemyNum)_short_1")
-                self.enemies[idx].node.size = SKTexture(imageNamed: "enemy_2_\(enemyNum)_short_1").size()
+                    self.enemies[idx].node.size = self.shortSize
                 self.enemies[idx].node.run(SKAction.sequence([enemyAnims[8].reversed(), SKAction.repeatForever(enemyAnims[4])]))
                 self.enemies[idx].state = .SHORT
-                }
-                else if randValue == 1 {
+                    print(self.enemies[idx].node.size)
+                } else if randValue == 1 {
                     if(self.enemies[idx].state == .LARGE) { return }
-                    enemies[idx].node.texture = SKTexture(imageNamed: "enemy_2_\(enemyNum)_large_1")
-                    self.enemies[idx].node.size = SKTexture(imageNamed: "enemy_2_\(enemyNum)_large_1").size()
+                    self.enemies[idx].node.size = self.largeSize
                     self.enemies[idx].node.run(SKAction.sequence([enemyAnims[8], SKAction.repeatForever(enemyAnims[1])]))
                     self.enemies[idx].state = .LARGE
+                    print(self.enemies[idx].node.size)
                 }
+                enemies[idx].node.physicsBody = SKPhysicsBody(texture: enemies[idx].node.texture!, size: enemies[idx].node.size)
+            case .BOTHHURT:
+                var position = enemies[idx].node.position
+                enemies[idx].node.removeFromParent()
+                enemies[idx].node = SKSpriteNode(texture: SKTexture(imageNamed: "enemy_2_\(enemyNum)_spawn_5"))
                 enemies[idx].node.size = CGSize(width: enemies[idx].node.size.width * 4, height: enemies[idx].node.size.height * 4)
                 enemies[idx].node.physicsBody = SKPhysicsBody(texture: enemies[idx].node.texture!, size: enemies[idx].node.size)
+                enemies[idx].node.name = "enemy_2_\(enemyNum)"
+                enemies[idx].state = .EGGSPAWN
+                enemies[idx].node.run(enemyAnims[5])
+                enemies[idx].node.position = position
+                self.addChild(self.enemies[idx].node)
             default:
                 print("Default")
                 return
