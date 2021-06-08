@@ -87,6 +87,19 @@ extension GameScene {
                    Enemy(initialPos: CGPoint(x: 0, y: self.size.height / 2.5 - 350))]
     }
     
+    func loadL3Enemies() {
+        /*enemies = [Enemy(initialPos: CGPoint(x: -75, y: self.size.height / 2.5 - 150)),
+                   Enemy(initialPos: CGPoint(x: 75, y: self.size.height / 2.5 - 150)),
+                   Enemy(initialPos: CGPoint(x: -225, y: self.size.height / 2.5 - 230)),
+                   Enemy(initialPos: CGPoint(x: 225, y: self.size.height / 2.5 - 230)),
+                   Enemy(initialPos: CGPoint(x: -300, y: self.size.height / 2.5 - 270)),
+                   Enemy(initialPos: CGPoint(x: 300, y: self.size.height / 2.5 - 270)),
+                   Enemy(initialPos: CGPoint(x: -337.5, y: self.size.height / 2.5 - 350)),
+                   Enemy(initialPos: CGPoint(x: 337.5, y: self.size.height / 2.5 - 350))]*/
+        
+        enemies = [Enemy(initialPos: CGPoint(x: -75, y: self.size.height / 2.5 - 150))]
+    }
+    
     @objc
     func addBirds() {
         self.changeLevelTimer = nil
@@ -159,6 +172,78 @@ extension GameScene {
                 self.enemies[index].node.run(enemyAnims[3])
                 Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 3..<6), target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.enemies[index], repeats: false)
                 Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 3..<7), target: self, selector: #selector(setNewAttackers(sender:)), userInfo: index, repeats: false)
+            }
+
+    }
+    
+    @objc
+    func addPhoenixes() {
+        self.changeLevelTimer = nil
+        var sceneNum: Int
+        if gameState == .LEVEL3 {
+            loadL3Enemies()
+            sceneNum = 3
+            //self.attackingEnemiesLimit = 8
+        }
+        else {
+            //loadL4Enemies()
+            sceneNum = 4
+            //self.attackingEnemiesLimit = 12
+        }
+        let animationCount = 7
+        let enemyAnimatedAtlas = SKTextureAtlas(named: "enemy_2_\(sceneNum-2)")
+        let animationsAtr: [(texName: String, texNum: Int, timePerFrame: Double)] =
+            [("enemy_2_\(sceneNum-2)_bothhurt_", 4, 0.3),
+             ("enemy_2_\(sceneNum-2)_large_", 4, 0.3),
+             ("enemy_2_\(sceneNum-2)_lefthurt_", 4, 0.3),
+             ("enemy_2_\(sceneNum-2)_righthurt_", 4, 0.3),
+             ("enemy_2_\(sceneNum-2)_short_", 4, 0.3),
+             ("enemy_2_\(sceneNum-2)_transition_", 2, 0.1),
+             ("enemy_2_\(sceneNum-2)_spawn_", 13, 0.3)]
+        enemyAnims = Array(repeating: SKAction(), count: animationCount)
+        var moveFrames: [SKTexture] = []
+        for anim in 0 ... animationsAtr.count-1 {
+            moveFrames = []
+            for index in 1 ... animationsAtr[anim].texNum {
+                let enemyTextureName = animationsAtr[anim].texName + "\(index)"
+                moveFrames.append(enemyAnimatedAtlas.textureNamed(enemyTextureName))
+            }
+            enemyAnims[anim] = SKAction.animate(
+                with: moveFrames,
+                timePerFrame: animationsAtr[anim].timePerFrame,
+                resize: false,
+                restore: true)
+        }
+        enemyAnims.insert(SKAction.animate(with: moveFrames[0...5].dropLast(), timePerFrame: 0.3, resize: false, restore: true),
+                          at: enemyAnims.count - 2)
+        let spawnIncubation = SKAction.animate(with: moveFrames[5...8].dropLast(), timePerFrame: 0.3, resize: false, restore: true)
+        let spawnHatch = SKAction.repeatForever(SKAction.animate(with: moveFrames[6...8].dropLast(), timePerFrame: 0.1, resize: false, restore: true))
+        enemyAnims.insert(SKAction.sequence([spawnIncubation, spawnHatch]) ,
+                          at: enemyAnims.count - 2)
+        enemyAnims.insert(SKAction.animate(with: moveFrames[8...12].dropLast(), timePerFrame: 0.3, resize: false, restore: true),
+                          at: enemyAnims.count - 2)
+        enemyAnims.popLast()
+        
+            let enemy = SKSpriteNode(texture: SKTexture(imageNamed: "enemy_2_\(sceneNum-2)_spawn_5"))
+            enemy.size = CGSize(width: enemy.size.width * 4, height: enemy.size.height * 4)
+            enemy.physicsBody = SKPhysicsBody(texture: enemy.texture!, size: enemy.size)
+            enemy.physicsBody?.categoryBitMask = 0x0000_0001
+            enemy.physicsBody?.contactTestBitMask = 0x0000_0111
+            enemy.physicsBody?.collisionBitMask = 0
+            enemy.physicsBody?.restitution = 0
+            enemy.name = "enemy_2_\(sceneNum-2)"
+            enemy.physicsBody?.affectedByGravity = false
+            for index in 0 ... enemies.count - 1 {
+                guard let enemyNode = enemy.copy() as? SKSpriteNode else { continue}
+                self.enemies[index].node = enemyNode
+                self.enemies[index].node.position = self.enemies[index].initialPos
+                self.enemies[index].flipRad = 200
+                self.enemies[index].state = .EGGSPAWN
+                self.addChild(self.enemies[index].node)
+                self.enemies[index].node.run(enemyAnims[5])
+                /*Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 3..<6), target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.enemies[index], repeats: false)
+                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 3..<7), target: self, selector: #selector(setNewAttackers(sender:)), userInfo: index, repeats: false)*/
+                Timer.scheduledTimer(timeInterval: TimeInterval((3 + (index / 5))), target: self, selector: #selector(setNewPhoenixAnim(sender:)), userInfo: index, repeats: false)
             }
 
     }

@@ -18,6 +18,15 @@ class GameScene: SKScene {
         case LOOPING
         case FLEE
         case RETURN
+        
+        case EGGSPAWN
+        case EGGINCUBATION
+        case EGGHATCH
+        case SHORT
+        case LARGE
+        case LEFTHURT
+        case RIGHTHURT
+        case BOTHHURT
     }
 
     public struct Enemy {
@@ -49,7 +58,7 @@ class GameScene: SKScene {
 
     override func didMove(to view: SKView) {
 
-        gameState = GameState.LEVEL1
+        gameState = GameState.LEVEL3
 
         let spaceshipYPositon = -(self.size.height / 2) + 150
 
@@ -62,7 +71,7 @@ class GameScene: SKScene {
         self.scoreLabel = SKLabelNode(text: "SCORE: 0")
         self.scoreLabel.position = CGPoint(x: 0, y: (self.size.height / 2) - 130)
         self.addChild(self.scoreLabel)
-        self.addBirds()
+        self.addPhoenixes()//self.addBirds()
         self.physicsWorld.contactDelegate = self
         Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
     }
@@ -114,7 +123,7 @@ class GameScene: SKScene {
 
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
-        self.updateBird()
+        //self.updateBird()
         if pastTime != 0.0 {
             deltaTime = CGFloat(currentTime - pastTime)
         }

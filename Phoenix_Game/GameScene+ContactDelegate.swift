@@ -22,9 +22,8 @@ extension GameScene: SKPhysicsContactDelegate {
         
 
         if oneNodeIsEnemy, oneNodeIsShoot {
-            nodeA.removeFromParent()
-            nodeB.removeFromParent()
             let enemy = nameA.hasPrefix("enemy") ? nodeA : nodeB
+            let shoot = nameA == "shoot" ? nodeA : nodeB
             var addedScore = 0
             guard let enemyNum = (enemy.name?[(enemy.name?.index(enemy.name!.startIndex, offsetBy: 6))!]) else {return}
             switch enemyNum {
@@ -32,10 +31,49 @@ extension GameScene: SKPhysicsContactDelegate {
                 let diagonalSpeed: Double = 600
                 let enemySpeed = (simd_length(_: simd_double2(x: Double(enemy.physicsBody?.velocity.dx ?? 0), y: Double(enemy.physicsBody?.velocity.dy ?? 0))))
                 addedScore = enemySpeed > diagonalSpeed ? (Int.random(in: 1..<25) * 10) : 20
+                enemy.removeFromParent()
+            case "2":
+                var offsetHit: CGFloat = 16
+                
+                if abs(enemy.position.x - shoot.position.x) < offsetHit
+                {
+                    addedScore = 20
+                    //enemy.removeFromParent()
+                    print("middle")
+                }
+                else if enemy.physicsBody?.restitution != 0.2 && shoot.position.x < enemy.position.x
+                    {
+                    if enemy.physicsBody?.restitution == 0
+                    {
+                        print("left")
+                        enemy.run(enemyAnims[2])
+                        enemy.physicsBody?.restitution = 0.2
+                    }
+                    else if enemy.physicsBody?.restitution == 0.2
+                    {
+                        print("both")
+                        enemy.run(enemyAnims[0])
+                        enemy.physicsBody?.restitution = 0.1
+                    }
+                    }
+                else if enemy.physicsBody?.restitution != 0.3{
+                    if enemy.physicsBody?.restitution == 0
+                    {
+                        print("right")
+                        enemy.run(enemyAnims[3])
+                        enemy.physicsBody?.restitution = 0.3
+                    }
+                    else if enemy.physicsBody?.restitution == 0.3{
+                        print("both")
+                        enemy.run(enemyAnims[0])
+                        enemy.physicsBody?.restitution = 0.1
+                    }
+                    }
             default:
                 return
             }
             print(addedScore)
+            shoot.removeFromParent()
             self.score += addedScore
             self.scoreLabel.text = "SCORE: \(self.score)"
             return

@@ -27,6 +27,71 @@ extension GameScene {
         }
     }
     
+    @objc
+    func setNewPhoenixAnim(sender: Timer) {
+        guard var idx = sender.userInfo as? Int else { return}
+        if self.enemies[idx].node.parent != nil{
+            guard let enemyNum = (enemies[idx].node.name?[(enemies[idx].node.name?.index(enemies[idx].node.name!.startIndex, offsetBy: 8))!]) else {return}
+            guard let bounce = enemies[idx].node.physicsBody?.restitution else {return}
+            switch CGFloat(round(10*bounce)/10) {
+            case 0.1:
+                enemies[idx].state = .BOTHHURT
+            case 0.2:
+                enemies[idx].state = .LEFTHURT
+            case 0.3:
+                enemies[idx].state = .RIGHTHURT
+            default:
+                break
+            }
+            print("Bounce: \(bounce)")
+            Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(setNewPhoenixAnim(sender:)), userInfo: idx, repeats: false)
+            switch self.enemies[idx].state {
+            case .EGGSPAWN:
+                enemies[idx].node.texture = SKTexture(imageNamed: "enemy_2_\(enemyNum)_spawn_8")
+                enemies[idx].node.physicsBody = SKPhysicsBody(texture: enemies[idx].node.texture!, size: enemies[idx].node.size)
+                self.enemies[idx].node.run(enemyAnims[6])
+                self.enemies[idx].state = .EGGINCUBATION
+            case .EGGINCUBATION:
+                enemies[idx].node.texture = SKTexture(imageNamed: "enemy_2_\(enemyNum)_short_1")
+                enemies[idx].node.physicsBody = SKPhysicsBody(texture: enemies[idx].node.texture!, size: enemies[idx].node.size)
+                self.enemies[idx].node.run(SKAction.sequence([enemyAnims[7], SKAction.repeatForever(enemyAnims[4])]))
+                self.enemies[idx].state = .EGGHATCH
+            case .EGGHATCH:
+                enemies[idx].node.texture = SKTexture(imageNamed: "enemy_2_\(enemyNum)_short_1")
+                enemies[idx].node.physicsBody = SKPhysicsBody(texture: enemies[idx].node.texture!, size: enemies[idx].node.size)
+                self.enemies[idx].node.run(SKAction.repeatForever(enemyAnims[4]))
+                self.enemies[idx].state = .SHORT
+            case .SHORT, .LARGE:
+                var randValue = Int.random(in: 0..<2)
+                
+                if randValue == 0 {
+                    if(self.enemies[idx].state == .SHORT) { return }
+                enemies[idx].node.texture = SKTexture(imageNamed: "enemy_2_\(enemyNum)_short_1")
+                self.enemies[idx].node.size = SKTexture(imageNamed: "enemy_2_\(enemyNum)_short_1").size()
+                self.enemies[idx].node.run(SKAction.sequence([enemyAnims[8].reversed(), SKAction.repeatForever(enemyAnims[4])]))
+                self.enemies[idx].state = .SHORT
+                }
+                else if randValue == 1 {
+                    if(self.enemies[idx].state == .LARGE) { return }
+                    enemies[idx].node.texture = SKTexture(imageNamed: "enemy_2_\(enemyNum)_large_1")
+                    self.enemies[idx].node.size = SKTexture(imageNamed: "enemy_2_\(enemyNum)_large_1").size()
+                    self.enemies[idx].node.run(SKAction.sequence([enemyAnims[8], SKAction.repeatForever(enemyAnims[1])]))
+                    self.enemies[idx].state = .LARGE
+                }
+                enemies[idx].node.size = CGSize(width: enemies[idx].node.size.width * 4, height: enemies[idx].node.size.height * 4)
+                enemies[idx].node.physicsBody = SKPhysicsBody(texture: enemies[idx].node.texture!, size: enemies[idx].node.size)
+            default:
+                print("Default")
+                return
+            }
+            enemies[idx].node.physicsBody?.restitution = 0
+            enemies[idx].node.physicsBody?.categoryBitMask = 0x0000_0001
+            enemies[idx].node.physicsBody?.contactTestBitMask = 0x0000_0111
+            enemies[idx].node.physicsBody?.collisionBitMask = 0
+            enemies[idx].node.physicsBody?.affectedByGravity = false
+        }
+    }
+    
     func updateBird() {
         var stillAlive = false
         for idx in 0 ... enemies.count - 1 {
