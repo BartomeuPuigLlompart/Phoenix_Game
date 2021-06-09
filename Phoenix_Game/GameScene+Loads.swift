@@ -33,19 +33,23 @@ extension GameScene {
             sprite.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
             sprite.physicsBody?.contactTestBitMask = 0x0000_0100
             sprite.physicsBody?.collisionBitMask = 0
+            var nextInterval: TimeInterval
             switch enemyStruct.node.name {
             case "enemy_1_1":
-                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 2..<16), target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
+                nextInterval = TimeInterval.random(in: 2..<16)
+                Timer.scheduledTimer(timeInterval: nextInterval, target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
             case "enemy_1_2":
-                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 2..<10), target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
+                nextInterval = TimeInterval.random(in: 2..<10)
+                Timer.scheduledTimer(timeInterval: nextInterval, target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
             case "enemy_2_1":
-                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 1..<3), target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
+                nextInterval = TimeInterval.random(in: TimeInterval(deltaTime) ..< 4)
+                Timer.scheduledTimer(timeInterval: nextInterval , target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
             case "enemy_2_2":
-                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 1..<2), target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
+                nextInterval = TimeInterval.random(in: TimeInterval(deltaTime) ..< 3)
+                Timer.scheduledTimer(timeInterval: nextInterval, target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
             default:
                 return
             }
-            
         }
     }
 
@@ -88,16 +92,16 @@ extension GameScene {
     }
     
     func loadL3Enemies() {
-        /*enemies = [Enemy(initialPos: CGPoint(x: -75, y: self.size.height / 2.5 - 150)),
-                   Enemy(initialPos: CGPoint(x: 75, y: self.size.height / 2.5 - 150)),
-                   Enemy(initialPos: CGPoint(x: -225, y: self.size.height / 2.5 - 230)),
-                   Enemy(initialPos: CGPoint(x: 225, y: self.size.height / 2.5 - 230)),
-                   Enemy(initialPos: CGPoint(x: -300, y: self.size.height / 2.5 - 270)),
-                   Enemy(initialPos: CGPoint(x: 300, y: self.size.height / 2.5 - 270)),
-                   Enemy(initialPos: CGPoint(x: -337.5, y: self.size.height / 2.5 - 350)),
-                   Enemy(initialPos: CGPoint(x: 337.5, y: self.size.height / 2.5 - 350))]*/
+        enemies = [Enemy(initialPos: CGPoint(x: -75, y: self.size.height / 2.5 - 150)),
+                   Enemy(initialPos: CGPoint(x: 75, y: self.size.height / 2.5 - 225)),
+                   Enemy(initialPos: CGPoint(x: -225, y: self.size.height / 2.5 - 300)),
+                   Enemy(initialPos: CGPoint(x: 225, y: self.size.height / 2.5 - 375)),
+                   Enemy(initialPos: CGPoint(x: -300, y: self.size.height / 2.5 - 450)),
+                   Enemy(initialPos: CGPoint(x: 300, y: self.size.height / 2.5 - 525)),
+                   Enemy(initialPos: CGPoint(x: -337.5, y: self.size.height / 2.5 - 600)),
+                   Enemy(initialPos: CGPoint(x: 337.5, y: self.size.height / 2.5 - 675))]
         
-        enemies = [Enemy(initialPos: CGPoint(x: -75, y: self.size.height / 2.5 - 150))]
+        //enemies = [Enemy(initialPos: CGPoint(x: -75, y: self.size.height / 2.5 - 150))]
     }
     
     @objc
@@ -237,12 +241,13 @@ extension GameScene {
                 guard let enemyNode = enemy.copy() as? SKSpriteNode else { continue}
                 self.enemies[index].node = enemyNode
                 self.enemies[index].node.position = self.enemies[index].initialPos
-                self.enemies[index].flipRad = 200
+                self.enemies[index].flipRad = 300
+                self.enemies[index].flipAngle = (0 - (CGFloat(index) * CGFloat.pi / 10.0))
                 self.enemies[index].state = .EGGSPAWN
                 self.addChild(self.enemies[index].node)
                 self.enemies[index].node.run(enemyAnims[5])
-                /*Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 3..<6), target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.enemies[index], repeats: false)
-                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 3..<7), target: self, selector: #selector(setNewAttackers(sender:)), userInfo: index, repeats: false)*/
+                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 9..<12), target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.enemies[index], repeats: false)
+                /*Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 3..<7), target: self, selector: #selector(setNewAttackers(sender:)), userInfo: index, repeats: false)*/
                 Timer.scheduledTimer(timeInterval: TimeInterval((3 + (index / 5))), target: self, selector: #selector(setNewPhoenixAnim(sender:)), userInfo: index, repeats: false)
             }
 

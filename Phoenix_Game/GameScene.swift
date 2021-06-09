@@ -51,6 +51,8 @@ class GameScene: SKScene {
     var enemyAnims: [SKAction]!
     let largeSize: CGSize = CGSize(width: 48*4, height: 16*4)
     let shortSize: CGSize = CGSize(width: 25*4, height: 16*4)
+    var globalY: CGFloat = 0.0
+    var nextGlobalY: CGFloat = -300.0
     private var label: SKLabelNode?
     private var spinnyNode: SKShapeNode?
     private var spaceshipTouch: UITouch?
@@ -126,6 +128,7 @@ class GameScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
         //self.updateBird()
+        self.updatePhoenix()
         if pastTime != 0.0 {
             deltaTime = CGFloat(currentTime - pastTime)
         }

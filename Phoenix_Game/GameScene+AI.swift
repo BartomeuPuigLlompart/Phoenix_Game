@@ -90,6 +90,7 @@ extension GameScene {
                 enemies[idx].node.run(enemyAnims[5])
                 enemies[idx].node.position = position
                 self.addChild(self.enemies[idx].node)
+                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 9..<12), target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemies[idx], repeats: false)
             default:
                 print("Default")
                 return
@@ -100,6 +101,48 @@ extension GameScene {
             enemies[idx].node.physicsBody?.collisionBitMask = 0
             enemies[idx].node.physicsBody?.affectedByGravity = false
         }
+    }
+    
+    func updatePhoenix() {
+        var stillAlive = false
+        var hatch = false
+        for idx in 0 ... enemies.count - 1 {
+            guard enemies[idx].node.parent != nil else { continue }
+            stillAlive = true
+            hatch = ((CGFloat.pi * 7) < enemies[idx].flipAngle)
+            var newPos = enemies[idx].flipCenter.x + cos(enemies[idx].flipAngle) * enemies[idx].flipRad
+            if !hatch {enemies[idx].node.position.x = newPos}
+            else {
+                enemies[idx].node.position.x += (newPos - enemies[idx].node.position.x) * self.deltaTime
+            }
+            enemies[idx].node.position.y =  enemies[idx].initialPos.y + self.globalY
+            if hatch && abs(enemies[idx].node.position.x) < 10
+            {
+                //print("now")
+                enemies[idx].flipRad = CGFloat.random(in: 300 ..< 1000)
+            }
+            enemies[idx].flipAngle += (self.deltaTime * (2.5 + ((hatch ? 1 : 0))))
+        }
+        if hatch
+        {
+            self.globalY += ((self.nextGlobalY - self.globalY) * self.deltaTime * 0.25)
+            if abs(self.nextGlobalY - self.globalY) < 75
+            {
+                self.nextGlobalY = CGFloat.random(in: 0 ..< 500) * (self.nextGlobalY * -1 / abs(self.nextGlobalY))
+            }
+        }
+        /*if !stillAlive && self.changeLevelTimer == nil {
+            //self.scoreLabel.text = "You Win"
+            gameState = gameState == .LEVEL1 ? .LEVEL2 : .LEVEL3
+            self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
+                                                         target: self,
+                                                         selector: #selector(addBirds),
+                                                         userInfo: nil,
+                                                         repeats: false)
+            self.attackingEnemiesCounter = 0
+            self.greenFlag = false
+            Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
+        }*/
     }
     
     func updateBird() {

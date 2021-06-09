@@ -34,9 +34,9 @@ extension GameScene: SKPhysicsContactDelegate {
             case "2":
                 let offsetHit: CGFloat = 16
                 guard var bounce = enemy.physicsBody?.restitution else {return}
-                if abs(enemy.position.x - shoot.position.x) < offsetHit {
+                if abs(enemy.position.x - shoot.position.x) < offsetHit || enemy.texture?.size().width ?? 25.0 < 23.0 {
                     addedScore = 20
-                    //enemy.removeFromParent()
+                    enemy.removeFromParent()
                     print("middle")
                 } else if CGFloat(round(10*bounce)/10) != 0.2 && shoot.position.x < enemy.position.x {
                     if CGFloat(round(10*bounce)/10) == 0 {
