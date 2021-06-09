@@ -12,13 +12,13 @@ extension GameScene {
     @objc
     func setNewAttackers(sender: Timer) {
         guard var idx = sender.userInfo as? Int else { return}
+        if gameState == .LEVEL3 { return }
         if self.enemies[idx].node.parent != nil{
-        var range: Int = gameState == .LEVEL1 ? 70 : 90
+            let range: Int = gameState == .LEVEL1 ? 70 : 90
             if greenFlag && self.attackingEnemiesCounter < self.attackingEnemiesLimit && self.enemies[idx].state == .STANDBY && Int.random(in: 0..<101) < (range) {
                 self.enemies[idx].state = EnemyState.ATTACKING
                 self.enemies[idx].node.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
                 self.enemies[idx].node.run(enemyAnims[1])
-                self.attackingEnemiesCounter += 1
                 self.greenFlag = false
                 Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 10..<16), target: self, selector: #selector(setNewAttackers(sender:)), userInfo: idx, repeats: false)
                 Timer.scheduledTimer(timeInterval: TimeInterval(self.deltaTime * 20), target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
@@ -131,25 +131,39 @@ extension GameScene {
                 self.nextGlobalY = CGFloat.random(in: 0 ..< 500) * (self.nextGlobalY * -1 / abs(self.nextGlobalY))
             }
         }
-        /*if !stillAlive && self.changeLevelTimer == nil {
+        if !stillAlive && self.changeLevelTimer == nil {
             //self.scoreLabel.text = "You Win"
-            gameState = gameState == .LEVEL1 ? .LEVEL2 : .LEVEL3
-            self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
-                                                         target: self,
-                                                         selector: #selector(addBirds),
-                                                         userInfo: nil,
-                                                         repeats: false)
+            gameState = gameState == .LEVEL3 ? .LEVEL4 : .LEVEL1
+            
+            
             self.attackingEnemiesCounter = 0
             self.greenFlag = false
             Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
-        }*/
+            
+            if gameState == .LEVEL4 {
+                self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
+                                                             target: self,
+                                                             selector: #selector(addPhoenixes),
+                                                             userInfo: nil,
+                                                             repeats: false)
+            }
+            else {
+                self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
+                                                             target: self,
+                                                             selector: #selector(addBirds),
+                                                             userInfo: nil,
+                                                             repeats: false)
+            }
+        }
     }
     
     func updateBird() {
         var stillAlive = false
+        self.attackingEnemiesCounter = 0
         for idx in 0 ... enemies.count - 1 {
             guard enemies[idx].node.parent != nil else { continue }
             stillAlive = true
+            self.attackingEnemiesCounter += 1
             switch enemies[idx].state {
             case EnemyState.ATTACKING:
                 let xDiff = self.ship.position.x - enemies[idx].node.position.x
@@ -228,24 +242,33 @@ extension GameScene {
                     enemies[idx].node.position = enemies[idx].initialPos
                     enemies[idx].state = EnemyState.STANDBY
                     self.enemies[idx].node.run(enemyAnims[0])
-                    self.attackingEnemiesCounter -= 1
                 }
 
             default:
-                continue
+                self.attackingEnemiesCounter -= 1
             }
         }
+        print(self.attackingEnemiesCounter)
         if !stillAlive && self.changeLevelTimer == nil {
             //self.scoreLabel.text = "You Win"
             gameState = gameState == .LEVEL1 ? .LEVEL2 : .LEVEL3
-            self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
-                                                         target: self,
-                                                         selector: #selector(addBirds),
-                                                         userInfo: nil,
-                                                         repeats: false)
             self.attackingEnemiesCounter = 0
             self.greenFlag = false
             Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
+            if gameState == .LEVEL3 {
+                self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
+                                                             target: self,
+                                                             selector: #selector(addPhoenixes),
+                                                             userInfo: nil,
+                                                             repeats: false)
+            }
+            else {
+                self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
+                                                             target: self,
+                                                             selector: #selector(addBirds),
+                                                             userInfo: nil,
+                                                             repeats: false)
+            }
         }
     }
 }

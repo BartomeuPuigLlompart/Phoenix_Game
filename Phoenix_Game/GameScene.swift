@@ -62,7 +62,7 @@ class GameScene: SKScene {
 
     override func didMove(to view: SKView) {
 
-        gameState = GameState.LEVEL3
+        gameState = GameState.LEVEL1
 
         let spaceshipYPositon = -(self.size.height / 2) + 150
 
@@ -75,7 +75,7 @@ class GameScene: SKScene {
         self.scoreLabel = SKLabelNode(text: "SCORE: 0")
         self.scoreLabel.position = CGPoint(x: 0, y: (self.size.height / 2) - 130)
         self.addChild(self.scoreLabel)
-        self.addPhoenixes()//self.addBirds()
+        self.addBirds()
         self.physicsWorld.contactDelegate = self
         Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
     }
@@ -127,8 +127,14 @@ class GameScene: SKScene {
 
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
-        //self.updateBird()
-        self.updatePhoenix()
+        switch gameState {
+        case .LEVEL1, .LEVEL2:
+            self.updateBird()
+        case .LEVEL3, .LEVEL4:
+            self.updatePhoenix()
+        default:
+            break
+        }
         if pastTime != 0.0 {
             deltaTime = CGFloat(currentTime - pastTime)
         }

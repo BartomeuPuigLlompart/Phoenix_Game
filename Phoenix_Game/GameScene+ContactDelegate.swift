@@ -29,13 +29,14 @@ extension GameScene: SKPhysicsContactDelegate {
             case "1":
                 let diagonalSpeed: Double = 600
                 let enemySpeed = (simd_length(_: simd_double2(x: Double(enemy.physicsBody?.velocity.dx ?? 0), y: Double(enemy.physicsBody?.velocity.dy ?? 0))))
-                addedScore = enemySpeed > diagonalSpeed ? (Int.random(in: 1..<25) * 10) : 20
+                let bonus = [20, 40, 80]
+                addedScore = enemySpeed > diagonalSpeed ? 200 : bonus[(Int.random(in: 0..<3))]
                 enemy.removeFromParent()
             case "2":
                 let offsetHit: CGFloat = 16
                 guard var bounce = enemy.physicsBody?.restitution else {return}
                 if abs(enemy.position.x - shoot.position.x) < offsetHit || enemy.texture?.size().width ?? 25.0 < 23.0 {
-                    addedScore = 20
+                    addedScore = enemy.texture?.size().width ?? 25.0 < 23.0 ? Int.random(in: 1..<3) * 50 : Int.random(in: 10..<81) * 10
                     enemy.removeFromParent()
                     print("middle")
                 } else if CGFloat(round(10*bounce)/10) != 0.2 && shoot.position.x < enemy.position.x {

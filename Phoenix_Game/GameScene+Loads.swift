@@ -104,6 +104,19 @@ extension GameScene {
         //enemies = [Enemy(initialPos: CGPoint(x: -75, y: self.size.height / 2.5 - 150))]
     }
     
+    func loadL4Enemies() {
+        enemies = [Enemy(initialPos: CGPoint(x: -75, y: self.size.height / 2.5 - 150), flipAngle: 0.0),
+                   Enemy(initialPos: CGPoint(x: 75, y: self.size.height / 2.5 - 225), flipAngle: CGFloat.pi),
+                   Enemy(initialPos: CGPoint(x: -225, y: self.size.height / 2.5 - 300), flipAngle: 0.0),
+                   Enemy(initialPos: CGPoint(x: 225, y: self.size.height / 2.5 - 375), flipAngle: CGFloat.pi),
+                   Enemy(initialPos: CGPoint(x: -300, y: self.size.height / 2.5 - 450), flipAngle: 0.0),
+                   Enemy(initialPos: CGPoint(x: 300, y: self.size.height / 2.5 - 525), flipAngle: CGFloat.pi),
+                   Enemy(initialPos: CGPoint(x: -337.5, y: self.size.height / 2.5 - 600), flipAngle: 0.0),
+                   Enemy(initialPos: CGPoint(x: 337.5, y: self.size.height / 2.5 - 675), flipAngle: CGFloat.pi)]
+        
+        //enemies = [Enemy(initialPos: CGPoint(x: -75, y: self.size.height / 2.5 - 150))]
+    }
+    
     @objc
     func addBirds() {
         self.changeLevelTimer = nil
@@ -187,12 +200,10 @@ extension GameScene {
         if gameState == .LEVEL3 {
             loadL3Enemies()
             sceneNum = 3
-            //self.attackingEnemiesLimit = 8
         }
         else {
-            //loadL4Enemies()
+            loadL4Enemies()
             sceneNum = 4
-            //self.attackingEnemiesLimit = 12
         }
         let animationCount = 7
         let enemyAnimatedAtlas = SKTextureAtlas(named: "enemy_2_\(sceneNum-2)")
@@ -242,12 +253,11 @@ extension GameScene {
                 self.enemies[index].node = enemyNode
                 self.enemies[index].node.position = self.enemies[index].initialPos
                 self.enemies[index].flipRad = 300
-                self.enemies[index].flipAngle = (0 - (CGFloat(index) * CGFloat.pi / 10.0))
+                self.enemies[index].flipAngle += (0 - (CGFloat(index) * CGFloat.pi / 10.0))
                 self.enemies[index].state = .EGGSPAWN
                 self.addChild(self.enemies[index].node)
                 self.enemies[index].node.run(enemyAnims[5])
                 Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 9..<12), target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.enemies[index], repeats: false)
-                /*Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 3..<7), target: self, selector: #selector(setNewAttackers(sender:)), userInfo: index, repeats: false)*/
                 Timer.scheduledTimer(timeInterval: TimeInterval((3 + (index / 5))), target: self, selector: #selector(setNewPhoenixAnim(sender:)), userInfo: index, repeats: false)
             }
 
