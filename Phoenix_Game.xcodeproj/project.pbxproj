@@ -40,7 +40,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		953DF3862644587E00DC8189 /* GameScene+Loads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+Loads.swift"; sourceTree = "<group>"; };
+		953DF3862644587E00DC8189 /* GameScene+Loads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+Loads.swift"; sourceTree = "<group>"; wrapsLines = 1; };
 		955A0001263C16420023D8EB /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		955A0003263C16420023D8EB /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		955A0006263C16420023D8EB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -128,8 +128,6 @@
 			isa = PBXGroup;
 			children = (
 				955AFFFB263C16400023D8EB /* AppDelegate.swift */,
-				955AFFFD263C16420023D8EB /* GameScene.sks */,
-				955AFFFF263C16420023D8EB /* Actions.sks */,
 				955A0001263C16420023D8EB /* GameScene.swift */,
 				953DF3862644587E00DC8189 /* GameScene+Loads.swift */,
 				959BF6D02649A153007933C1 /* GameScene+AI.swift */,
@@ -138,6 +136,8 @@
 				955A0005263C16420023D8EB /* Main.storyboard */,
 				955A0008263C166B0023D8EB /* Assets.xcassets */,
 				955A000A263C166B0023D8EB /* Info.plist */,
+				955AFFFF263C16420023D8EB /* Actions.sks */,
+				955AFFFD263C16420023D8EB /* GameScene.sks */,
 			);
 			path = Phoenix_Game;
 			sourceTree = "<group>";

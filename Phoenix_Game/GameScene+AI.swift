@@ -14,7 +14,17 @@ extension GameScene {
         guard var idx = sender.userInfo as? Int else { return}
         if gameState == .LEVEL3 { return }
         if self.enemies[idx].node.parent != nil{
-            let range: Int = gameState == .LEVEL1 ? 70 : 90
+            var range: Int
+            switch gameState {
+            case .LEVEL1:
+                range = 70
+            case .LEVEL2:
+                range = 90
+            case .LEVEL5:
+                range = 10
+            default:
+                return
+            }
             if greenFlag && self.attackingEnemiesCounter < self.attackingEnemiesLimit && self.enemies[idx].state == .STANDBY && Int.random(in: 0..<101) < (range) {
                 self.enemies[idx].state = EnemyState.ATTACKING
                 self.enemies[idx].node.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
@@ -30,7 +40,7 @@ extension GameScene {
     @objc
     func setNewPhoenixAnim(sender: Timer) {
         guard var idx = sender.userInfo as? Int else { return}
-        if self.enemies[idx].node.parent != nil{
+        if self.enemies[idx].node.parent != nil {
             guard let enemyNum = (enemies[idx].node.name?[(enemies[idx].node.name?.index(enemies[idx].node.name!.startIndex, offsetBy: 8))!]) else {return}
             guard let bounce = enemies[idx].node.physicsBody?.restitution else {return}
             switch CGFloat(round(10*bounce)/10) {
@@ -90,14 +100,14 @@ extension GameScene {
                 enemies[idx].node.run(enemyAnims[5])
                 enemies[idx].node.position = position
                 self.addChild(self.enemies[idx].node)
-                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 9..<12), target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemies[idx], repeats: false)
+                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 9..<12), target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemies[idx].node, repeats: false)
             default:
                 print("Default")
                 return
             }
             enemies[idx].node.physicsBody?.restitution = 0
-            enemies[idx].node.physicsBody?.categoryBitMask = 0x0000_0001
-            enemies[idx].node.physicsBody?.contactTestBitMask = 0x0000_0111
+            enemies[idx].node.physicsBody?.categoryBitMask = enemyCategory
+            enemies[idx].node.physicsBody?.contactTestBitMask = shootCategory | shieldCategory
             enemies[idx].node.physicsBody?.collisionBitMask = 0
             enemies[idx].node.physicsBody?.affectedByGravity = false
         }
@@ -133,7 +143,7 @@ extension GameScene {
         }
         if !stillAlive && self.changeLevelTimer == nil {
             //self.scoreLabel.text = "You Win"
-            gameState = gameState == .LEVEL3 ? .LEVEL4 : .LEVEL1
+            gameState = gameState == .LEVEL3 ? .LEVEL4 : .LEVEL5
             
             
             self.attackingEnemiesCounter = 0
@@ -150,7 +160,7 @@ extension GameScene {
             else {
                 self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
                                                              target: self,
-                                                             selector: #selector(addBirds),
+                                                             selector: #selector(addBoss),
                                                              userInfo: nil,
                                                              repeats: false)
             }
@@ -248,9 +258,9 @@ extension GameScene {
                 self.attackingEnemiesCounter -= 1
             }
         }
-        print(self.attackingEnemiesCounter)
-        if !stillAlive && self.changeLevelTimer == nil {
+        if gameState != .LEVEL5 && !stillAlive && self.changeLevelTimer == nil {
             //self.scoreLabel.text = "You Win"
+            //if  {return}
             gameState = gameState == .LEVEL1 ? .LEVEL2 : .LEVEL3
             self.attackingEnemiesCounter = 0
             self.greenFlag = false
@@ -270,5 +280,40 @@ extension GameScene {
                                                              repeats: false)
             }
         }
+    }
+    func updateBoss(_ currentTime: TimeInterval)
+    {
+        if !boss.deployed {return}
+        if boss.node.parent == nil {
+            //self.scoreLabel.text = "You Win"
+            gameState = .LEVEL1
+            self.attackingEnemiesCounter = 0
+            self.greenFlag = false
+            Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
+
+            self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
+                                                             target: self,
+                                                             selector: #selector(addBirds),
+                                                             userInfo: nil,
+                                                             repeats: false)
+            return
+        }
+        
+        if currentTime > (boss.frameRef + 0.15) {
+            boss.frameRef = currentTime
+        for tile in boss.plateGrid {
+            tile.position.x += tile.size.width
+            if tile.position.x >= 290.0 {
+                tile.position.x = -280.0
+            }
+        }
+        }
+        if currentTime > (boss.yGlobalRef + 0.5)
+        {
+            boss.yGlobalRef = currentTime
+            boss.node.position.y -= 2
+        }
+        
+        self.updateBird()
     }
 }

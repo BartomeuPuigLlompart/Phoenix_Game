@@ -10,19 +10,20 @@ extension GameScene {
         sprite.zPosition = 1
         addChild(sprite)
         sprite.physicsBody = SKPhysicsBody(texture: sprite.texture!, size: sprite.size)
-        sprite.physicsBody?.velocity = CGVector(dx: 0, dy: 500)
+        sprite.physicsBody?.velocity = CGVector(dx: 0, dy: 1000)
         sprite.physicsBody?.affectedByGravity = false
         sprite.physicsBody?.linearDamping = 0
-        sprite.physicsBody?.contactTestBitMask = 0x0000_0101
+        sprite.physicsBody?.categoryBitMask = shootCategory
+        sprite.physicsBody?.contactTestBitMask = 0x1 << 5
         sprite.physicsBody?.collisionBitMask = 0
     }
     
     @objc
     func enemyShoot(sender: Timer) {
-        guard let enemyStruct = sender.userInfo as? Enemy else { return}
-        if enemyStruct.node.parent != nil {
+        guard let enemyStruct = sender.userInfo as? SKSpriteNode else { return}
+        if enemyStruct.parent != nil {
             let sprite = SKSpriteNode(imageNamed: "Shoot")
-            sprite.position = enemyStruct.node.position
+            sprite.position = enemyStruct.position
             sprite.name = "bomb"
             sprite.zPosition = 1
             sprite.size = CGSize(width: sprite.size.width, height: sprite.size.height * 3)
@@ -31,10 +32,11 @@ extension GameScene {
             sprite.physicsBody?.affectedByGravity = false
             sprite.physicsBody?.linearDamping = 0
             sprite.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
-            sprite.physicsBody?.contactTestBitMask = 0x0000_0100
+            sprite.physicsBody?.categoryBitMask = enemyBombCategory
+            sprite.physicsBody?.contactTestBitMask = 0x1 << 5
             sprite.physicsBody?.collisionBitMask = 0
             var nextInterval: TimeInterval
-            switch enemyStruct.node.name {
+            switch enemyStruct.name {
             case "enemy_1_1":
                 nextInterval = TimeInterval.random(in: 2..<16)
                 Timer.scheduledTimer(timeInterval: nextInterval, target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
@@ -48,7 +50,9 @@ extension GameScene {
                 nextInterval = TimeInterval.random(in: TimeInterval(deltaTime) ..< 3)
                 Timer.scheduledTimer(timeInterval: nextInterval, target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
             default:
-                return
+                sprite.position.x = self.ship.position.x + CGFloat.random(in: -self.ship.size.width * 3 ..< self.ship.size.width * 3 + 1)
+                nextInterval = TimeInterval.random(in: TimeInterval(deltaTime) ..< 2.5)
+                Timer.scheduledTimer(timeInterval: nextInterval , target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
             }
         }
     }
@@ -100,8 +104,6 @@ extension GameScene {
                    Enemy(initialPos: CGPoint(x: 300, y: self.size.height / 2.5 - 525)),
                    Enemy(initialPos: CGPoint(x: -337.5, y: self.size.height / 2.5 - 600)),
                    Enemy(initialPos: CGPoint(x: 337.5, y: self.size.height / 2.5 - 675))]
-        
-        //enemies = [Enemy(initialPos: CGPoint(x: -75, y: self.size.height / 2.5 - 150))]
     }
     
     func loadL4Enemies() {
@@ -113,10 +115,48 @@ extension GameScene {
                    Enemy(initialPos: CGPoint(x: 300, y: self.size.height / 2.5 - 525), flipAngle: CGFloat.pi),
                    Enemy(initialPos: CGPoint(x: -337.5, y: self.size.height / 2.5 - 600), flipAngle: 0.0),
                    Enemy(initialPos: CGPoint(x: 337.5, y: self.size.height / 2.5 - 675), flipAngle: CGFloat.pi)]
-        
-        //enemies = [Enemy(initialPos: CGPoint(x: -75, y: self.size.height / 2.5 - 150))]
     }
     
+    func loadL5Enemies() {
+        enemies = [Enemy(initialPos: CGPoint(x: 0, y: -40)),
+                   Enemy(initialPos: CGPoint(x: 150.0, y: -40)),
+                   Enemy(initialPos: CGPoint(x: -150.0, y: -40)),
+                   Enemy(initialPos: CGPoint(x: 75.0, y: -40)),
+                   Enemy(initialPos: CGPoint(x: -75.0, y: -40)),
+                   Enemy(initialPos: CGPoint(x: 225.0, y: -40)),
+                   Enemy(initialPos: CGPoint(x: -225.0, y: -40)),
+                   Enemy(initialPos: CGPoint(x: -300, y: 110)),
+                   Enemy(initialPos: CGPoint(x: 300, y: 110)),
+                   Enemy(initialPos: CGPoint(x: -225, y: 150)),
+                   Enemy(initialPos: CGPoint(x: 225, y: 150)),
+                   Enemy(initialPos: CGPoint(x: -150, y: 190)),
+                   Enemy(initialPos: CGPoint(x: 150, y: 190)),
+                   Enemy(initialPos: CGPoint(x: -75, y: 230)),
+                   Enemy(initialPos: CGPoint(x: 75, y: 230)),
+                   Enemy(initialPos: CGPoint(x: 0, y: 230))]
+    }
+    
+    func loadShield()
+    {
+        self.shield = SKSpriteNode(imageNamed: "shield_1")
+        self.shield.name = "shield"
+        self.shield.size = CGSize(width: 50 * 2, height: 55 * 2)
+        self.shield.position = CGPoint(x: 0, y: 0)
+        self.shield.physicsBody = SKPhysicsBody(texture: self.shield.texture!, size: CGSize(width: self.shield.size.width * 2, height: self.shield.size.height * 2))
+        self.shield.physicsBody?.categoryBitMask = shieldCategory
+        self.shield.physicsBody?.contactTestBitMask = enemyBombCategory | enemyCategory
+        self.shield.physicsBody?.collisionBitMask = 0
+        self.shield.physicsBody?.affectedByGravity = false
+        self.ship.addChild(self.shield)
+        
+        let action = SKAction.repeat(SKAction.animate(
+                                    with: [SKTexture(imageNamed: "shield_1"), SKTexture(imageNamed: "shield_2")],
+                                    timePerFrame: 0.1,
+                                    resize: false,
+                                    restore: true), count: 5)
+        self.shield.run(SKAction.sequence([action, SKAction.removeFromParent()]))
+    }
+
     @objc
     func addBirds() {
         self.changeLevelTimer = nil
@@ -127,7 +167,12 @@ extension GameScene {
             self.attackingEnemiesLimit = 8
         }
         else {
-            loadL2Enemies()
+            if gameState == .LEVEL2 {
+                loadL2Enemies()
+            }
+            else {
+                loadL5Enemies()
+            }
             sceneNum = 2
             self.attackingEnemiesLimit = 12
         }
@@ -175,8 +220,8 @@ extension GameScene {
             let enemy = SKSpriteNode(texture: SKTexture(imageNamed: "enemy_1_\(sceneNum)_static_1"))
             enemy.size = CGSize(width: enemy.size.width * 4, height: enemy.size.height * 4)
             enemy.physicsBody = SKPhysicsBody(texture: enemy.texture!, size: enemy.size)
-            enemy.physicsBody?.categoryBitMask = 0x0000_0001
-            enemy.physicsBody?.contactTestBitMask = 0x0000_0111
+            enemy.physicsBody?.categoryBitMask = enemyCategory
+            enemy.physicsBody?.contactTestBitMask = shootCategory | shieldCategory
             enemy.physicsBody?.collisionBitMask = 0
             enemy.name = "enemy_1_\(sceneNum)"
             enemy.physicsBody?.affectedByGravity = false
@@ -187,7 +232,7 @@ extension GameScene {
                 self.enemies[index].flipRad = 200
                 self.addChild(self.enemies[index].node)
                 self.enemies[index].node.run(enemyAnims[3])
-                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 3..<6), target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.enemies[index], repeats: false)
+                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 3..<6), target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.enemies[index].node, repeats: false)
                 Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 3..<7), target: self, selector: #selector(setNewAttackers(sender:)), userInfo: index, repeats: false)
             }
 
@@ -242,8 +287,8 @@ extension GameScene {
             let enemy = SKSpriteNode(texture: SKTexture(imageNamed: "enemy_2_\(sceneNum-2)_spawn_5"))
             enemy.size = CGSize(width: enemy.size.width * 4, height: enemy.size.height * 4)
             enemy.physicsBody = SKPhysicsBody(texture: enemy.texture!, size: enemy.size)
-            enemy.physicsBody?.categoryBitMask = 0x0000_0001
-            enemy.physicsBody?.contactTestBitMask = 0x0000_0111
+            enemy.physicsBody?.categoryBitMask = enemyCategory
+            enemy.physicsBody?.contactTestBitMask = shootCategory | shieldCategory
             enemy.physicsBody?.collisionBitMask = 0
             enemy.physicsBody?.restitution = 0
             enemy.name = "enemy_2_\(sceneNum-2)"
@@ -257,9 +302,98 @@ extension GameScene {
                 self.enemies[index].state = .EGGSPAWN
                 self.addChild(self.enemies[index].node)
                 self.enemies[index].node.run(enemyAnims[5])
-                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 9..<12), target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.enemies[index], repeats: false)
+                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 9..<12), target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.enemies[index].node, repeats: false)
                 Timer.scheduledTimer(timeInterval: TimeInterval((3 + (index / 5))), target: self, selector: #selector(setNewPhoenixAnim(sender:)), userInfo: index, repeats: false)
             }
 
+    }
+    
+    @objc
+    func addBoss() {
+        self.boss = Boss()
+        self.boss.deployed = true
+        self.boss.node.texture?.filteringMode = .linear
+        self.boss.node.name = "boss"
+        self.boss.node.zPosition = -1
+        self.addChild(boss.node)
+        let enemyAnimatedAtlas = SKTextureAtlas(named: "boss")
+        var moveFrames: [SKTexture] = []
+        var animation: SKAction
+        for index in 1 ... 4 {
+            let enemyTextureName = "boss_alien_" + "\(index)"
+            moveFrames.append(enemyAnimatedAtlas.textureNamed(enemyTextureName))
+        }
+        animation = SKAction.animate(
+            with: moveFrames,
+            timePerFrame: 0.05,
+            resize: false,
+            restore: true)
+        boss.alien.run(SKAction.repeatForever(SKAction.sequence([animation, animation.reversed()])) )
+        boss.alien.position.y += 6
+        boss.alien.physicsBody = SKPhysicsBody(texture: boss.alien.texture!, size: boss.alien.size)
+        boss.alien.physicsBody?.categoryBitMask = enemyCategory
+        boss.alien.physicsBody?.contactTestBitMask = shootCategory | shieldCategory
+        boss.alien.physicsBody?.collisionBitMask = 0
+        boss.alien.physicsBody?.affectedByGravity = false
+        boss.alien.name = "alien"
+        self.boss.node.addChild(boss.alien)
+        
+        moveFrames = []
+        for index in 1 ... 5 {
+            let enemyTextureName = "boss_top_" + "\(index)"
+            moveFrames.append(enemyAnimatedAtlas.textureNamed(enemyTextureName))
+        }
+        animation = SKAction.animate(
+            with: moveFrames,
+            timePerFrame: 0.07,
+            resize: false,
+            restore: true)
+        
+        self.boss.bossTop.run(SKAction.repeatForever(animation))
+        self.boss.bossTop.position.y += 70
+        self.boss.node.addChild(self.boss.bossTop)
+        
+        let gridTextNum: [[Int]] = [
+            [4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4],
+            [0, 5, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 5, 0],
+            [0, 0, 0, 4, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 4, 0, 0, 0],
+            [0, 0, 0, 0, 0, 5, 4, 3, 2, 2, 3, 4, 5, 0, 0, 0, 0, 0]]
+        for yGrid in 0 ... self.boss.baseGrid.count - 1
+        {
+            for xGrid in 0 ... self.boss.baseGrid[0].count - 1
+            {
+                self.boss.baseGrid[yGrid][xGrid] = SKSpriteNode()
+                self.boss.baseGrid[yGrid][xGrid].position = CGPoint(x: -68 * 4 + xGrid * 8 * 4, y: -72 - yGrid * 8 * 4)
+                self.boss.baseGrid[yGrid][xGrid].size = CGSize(width: 8 * 4, height: 8 * 4)
+                if gridTextNum[yGrid][xGrid] > 0 {
+                    self.boss.baseGrid[yGrid][xGrid].texture = SKTexture(imageNamed: "base_tile_\(gridTextNum[yGrid][xGrid])")
+                    self.boss.baseGrid[yGrid][xGrid].texture?.filteringMode = .linear
+                    self.boss.baseGrid[yGrid][xGrid].physicsBody = SKPhysicsBody(texture: self.boss.baseGrid[yGrid][xGrid].texture!, size: self.boss.baseGrid[yGrid][xGrid].size)
+                    self.boss.baseGrid[yGrid][xGrid].physicsBody?.categoryBitMask = enemyCategory
+                    self.boss.baseGrid[yGrid][xGrid].physicsBody?.contactTestBitMask = shootCategory | shieldCategory
+                    self.boss.baseGrid[yGrid][xGrid].physicsBody?.collisionBitMask = 0
+                    self.boss.baseGrid[yGrid][xGrid].physicsBody?.affectedByGravity = false
+                }
+                self.boss.baseGrid[yGrid][xGrid].name = "base_tile_\(gridTextNum[yGrid][xGrid])"
+                boss.node.addChild(self.boss.baseGrid[yGrid][xGrid])
+                if yGrid < 2 {
+                    let nSize = CGSize(width: 4 * 4, height: 8 * 4)
+                    let idx = (yGrid * (self.boss.plateGrid.count / 2)) + xGrid
+                    self.boss.plateGrid[idx] = SKSpriteNode(texture: SKTexture(imageNamed: "plate_tile_\(Float(xGrid).remainder(dividingBy: 2) == 0 ? 2 : 1)"), size: nSize)
+                   self.boss.plateGrid[idx].position = CGPoint(x: (16 * yGrid) - 70 * 4 + xGrid * 8 * 4, y: (-40))
+                    self.boss.plateGrid[idx].texture?.filteringMode = .linear
+                    self.boss.plateGrid[idx].name = "plate_tile_\(Float(xGrid).remainder(dividingBy: 2) == 0 ? 2 : 1)"
+                    self.boss.plateGrid[idx].physicsBody = SKPhysicsBody(texture: self.boss.plateGrid[idx].texture!, size: nSize)
+                    self.boss.plateGrid[idx].physicsBody?.categoryBitMask = enemyCategory
+                    self.boss.plateGrid[idx].physicsBody?.contactTestBitMask = shootCategory | shieldCategory
+                    self.boss.plateGrid[idx].physicsBody?.collisionBitMask = 0
+                    self.boss.plateGrid[idx].physicsBody?.affectedByGravity = false
+                    boss.node.addChild(self.boss.plateGrid[idx])
+                }
+            }
+        }
+        let nextInterval = TimeInterval.random(in: TimeInterval(deltaTime) ..< 2.5)
+        Timer.scheduledTimer(timeInterval: nextInterval , target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.boss.node, repeats: false)
+        self.addBirds()
     }
 }

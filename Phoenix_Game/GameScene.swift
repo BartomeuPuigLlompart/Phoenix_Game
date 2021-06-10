@@ -28,6 +28,17 @@ class GameScene: SKScene {
         case RIGHTHURT
         case BOTHHURT
     }
+    
+    public struct Boss {
+        let node: SKSpriteNode = SKSpriteNode(texture: SKTexture(imageNamed: "boss"))
+        var baseGrid = Array(repeating: Array(repeating: SKSpriteNode(), count: 18), count: 4)
+        var plateGrid = Array(repeating: SKSpriteNode(), count: 36)
+        let alien: SKSpriteNode = SKSpriteNode(texture: SKTexture(imageNamed: "boss_alien_1"))
+        let bossTop: SKSpriteNode = SKSpriteNode(texture: SKTexture(imageNamed: "boss_top_1"))
+        var frameRef: TimeInterval = 0.0
+        var yGlobalRef: TimeInterval = 0.0
+        var deployed = false
+    }
 
     public struct Enemy {
         var node: SKSpriteNode = SKSpriteNode()
@@ -47,7 +58,9 @@ class GameScene: SKScene {
     var greenFlag: Bool = false
     var shipRateOfFire: Bool = true
     var ship: SKSpriteNode!
-    var enemies: [Enemy]!
+    var shield: SKSpriteNode!
+    var enemies: [Enemy] = [Enemy()]
+    var boss: Boss = Boss()
     var enemyAnims: [SKAction]!
     let largeSize: CGSize = CGSize(width: 48*4, height: 16*4)
     let shortSize: CGSize = CGSize(width: 25*4, height: 16*4)
@@ -59,6 +72,13 @@ class GameScene: SKScene {
     var gameState: GameState?
     var enemiesAttackTimer: Timer?
     var changeLevelTimer: Timer?
+    var firstTouchShip: CGPoint = CGPoint(x: 0, y: 0)
+    var firstTouchRef: CGFloat = 0.0
+    var firstTouchDist: CGFloat = 0.0
+    let enemyCategory  : UInt32 = 0x1 << 1
+    let shootCategory: UInt32 = 0x1 << 2
+    let enemyBombCategory : UInt32 = 0x1 << 3
+    let shieldCategory : UInt32 = 0x1 << 4
 
     override func didMove(to view: SKView) {
 
@@ -71,7 +91,13 @@ class GameScene: SKScene {
         self.ship.name = "spaceship"
         self.ship.size = CGSize(width: 50, height: 55)
         self.ship.position = CGPoint(x: 0, y: spaceshipYPositon)
+        self.ship.physicsBody = SKPhysicsBody(texture: self.ship.texture!, size: CGSize(width: self.ship.size.width * 0.25, height: self.ship.size.height * 0.25))
+        self.ship.physicsBody?.categoryBitMask = shieldCategory
+        self.ship.physicsBody?.contactTestBitMask = enemyBombCategory | enemyCategory
+        self.ship.physicsBody?.collisionBitMask = 0
+        self.ship.physicsBody?.affectedByGravity = false
         self.addChild(self.ship)
+        
         self.scoreLabel = SKLabelNode(text: "SCORE: 0")
         self.scoreLabel.position = CGPoint(x: 0, y: (self.size.height / 2) - 130)
         self.addChild(self.scoreLabel)
@@ -81,6 +107,7 @@ class GameScene: SKScene {
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with _: UIEvent?) {
+        if self.ship.childNode(withName: "shield") != nil { return }
         guard self.spaceshipTouch == nil
         else {
             if !self.shipRateOfFire {return}
@@ -89,9 +116,10 @@ class GameScene: SKScene {
             Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(setShipGreenFlag), userInfo: nil, repeats: false)
             return
         }
-
+        
         if let touch = touches.first {
             self.spaceshipTouch = touch
+            self.firstTouchShip = touch.location(in: self.view)
             let newPosition = touch.location(in: self)
             let action = SKAction.moveTo(x: newPosition.x, duration: 0.5)
             action.timingMode = .easeInEaseOut
@@ -102,9 +130,10 @@ class GameScene: SKScene {
     override func touchesMoved(_ touches: Set<UITouch>, with _: UIEvent?) {
         guard let spaceshipTouch = self.spaceshipTouch else { return }
         guard let touchIndex = touches.firstIndex(of: spaceshipTouch) else { return }
-
+        if self.ship.childNode(withName: "shield") != nil { return }
+        
         let touch = touches[touchIndex]
-
+        //print(touch)
         let newPosition = touch.location(in: self)
         let action = SKAction.moveTo(x: newPosition.x, duration: 0.05)
         action.timingMode = .easeInEaseOut
@@ -114,7 +143,12 @@ class GameScene: SKScene {
     override func touchesEnded(_ touches: Set<UITouch>, with _: UIEvent?) {
         guard let spaceshipTouch = self.spaceshipTouch else { return }
         guard touches.firstIndex(of: spaceshipTouch) != nil else { return }
-
+        let xfirst = self.firstTouchShip.x
+        let yfirst = self.firstTouchShip.y
+        let xlast = touches.first?.location(in: self.view).x
+        let ylast = touches.first?.location(in: self.view).y
+        self.firstTouchDist = sqrt(pow(xlast! - xfirst, 2) + pow(ylast! - yfirst, 2))
+        print(self.firstTouchDist)
         self.spaceshipTouch = nil
     }
 
@@ -127,13 +161,28 @@ class GameScene: SKScene {
 
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
+        if self.spaceshipTouch != nil && self.firstTouchRef == 0.0
+        {
+            firstTouchRef = CGFloat(currentTime)
+        }
+        else if self.spaceshipTouch == nil && self.firstTouchRef > 0.0
+        {
+            if CGFloat(currentTime) - self.firstTouchRef < self.deltaTime * 20 && self.firstTouchDist < 20.0
+            {
+                self.ship.removeAllActions()
+                self.ship.texture = SKTexture(imageNamed: "ship_sprite")
+                self.loadShield()
+            }
+            self.firstTouchRef = 0.0
+            
+        }
         switch gameState {
         case .LEVEL1, .LEVEL2:
             self.updateBird()
         case .LEVEL3, .LEVEL4:
             self.updatePhoenix()
         default:
-            break
+            self.updateBoss(currentTime)
         }
         if pastTime != 0.0 {
             deltaTime = CGFloat(currentTime - pastTime)
