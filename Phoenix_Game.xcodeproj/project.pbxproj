@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		953DF3872644587E00DC8189 /* GameScene+Loads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953DF3862644587E00DC8189 /* GameScene+Loads.swift */; };
+		955936EF26761B4A00028745 /* ARCADECLASSIC.TTF in Resources */ = {isa = PBXBuildFile; fileRef = 955936EE26761B4A00028745 /* ARCADECLASSIC.TTF */; };
 		955A0000263C16420023D8EB /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 955AFFFF263C16420023D8EB /* Actions.sks */; };
 		955A0002263C16420023D8EB /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955A0001263C16420023D8EB /* GameScene.swift */; };
 		955A0004263C16420023D8EB /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955A0003263C16420023D8EB /* GameViewController.swift */; };
@@ -41,6 +42,7 @@
 
 /* Begin PBXFileReference section */
 		953DF3862644587E00DC8189 /* GameScene+Loads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+Loads.swift"; sourceTree = "<group>"; wrapsLines = 1; };
+		955936EE26761B4A00028745 /* ARCADECLASSIC.TTF */ = {isa = PBXFileReference; lastKnownFileType = file; name = ARCADECLASSIC.TTF; path = ../../arcadeclassic/ARCADECLASSIC.TTF; sourceTree = "<group>"; };
 		955A0001263C16420023D8EB /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		955A0003263C16420023D8EB /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		955A0006263C16420023D8EB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -107,6 +109,7 @@
 		955AFFEF263C163F0023D8EB = {
 			isa = PBXGroup;
 			children = (
+				955936EE26761B4A00028745 /* ARCADECLASSIC.TTF */,
 				955AFFFA263C16400023D8EB /* Phoenix_Game */,
 				955A0012263C166C0023D8EB /* Phoenix_GameTests */,
 				955A001D263C166D0023D8EB /* Phoenix_GameUITests */,
@@ -269,6 +272,7 @@
 				955A0007263C16420023D8EB /* Main.storyboard in Resources */,
 				955AFFFE263C16420023D8EB /* GameScene.sks in Resources */,
 				955A0009263C166B0023D8EB /* Assets.xcassets in Resources */,
+				955936EF26761B4A00028745 /* ARCADECLASSIC.TTF in Resources */,
 				955A0000263C16420023D8EB /* Actions.sks in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

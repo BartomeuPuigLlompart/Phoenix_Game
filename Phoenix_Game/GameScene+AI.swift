@@ -13,7 +13,7 @@ extension GameScene {
     func setNewAttackers(sender: Timer) {
         guard var idx = sender.userInfo as? Int else { return}
         if gameState == .LEVEL3 { return }
-        if self.enemies[idx].node.parent != nil{
+        if self.enemies[idx].node.parent != nil {
             var range: Int
             switch gameState {
             case .LEVEL1:
@@ -37,7 +37,7 @@ extension GameScene {
             Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 1..<4), target: self, selector: #selector(setNewAttackers(sender:)), userInfo: idx, repeats: false)
         }
     }
-    
+
     @objc
     func setNewPhoenixAnim(sender: Timer) {
         guard var idx = sender.userInfo as? Int else { return}
@@ -75,15 +75,15 @@ extension GameScene {
                 self.enemies[idx].state = .SHORT
             case .SHORT, .LARGE:
                 var randValue = Int.random(in: 0..<2)
-                
+
                 if randValue == 0 {
-                    if(self.enemies[idx].state == .SHORT) { return }
+                    if self.enemies[idx].state == .SHORT { return }
                     self.enemies[idx].node.size = self.shortSize
                 self.enemies[idx].node.run(SKAction.sequence([enemyAnims[8].reversed(), SKAction.repeatForever(enemyAnims[4])]))
                 self.enemies[idx].state = .SHORT
                     print(self.enemies[idx].node.size)
                 } else if randValue == 1 {
-                    if(self.enemies[idx].state == .LARGE) { return }
+                    if self.enemies[idx].state == .LARGE { return }
                     self.enemies[idx].node.size = self.largeSize
                     self.enemies[idx].node.run(SKAction.sequence([enemyAnims[8], SKAction.repeatForever(enemyAnims[1])]))
                     self.enemies[idx].state = .LARGE
@@ -113,7 +113,7 @@ extension GameScene {
             enemies[idx].node.physicsBody?.affectedByGravity = false
         }
     }
-    
+
     func updatePhoenix() {
         var stillAlive = false
         var hatch = false
@@ -122,34 +122,30 @@ extension GameScene {
             stillAlive = true
             hatch = ((CGFloat.pi * 7) < enemies[idx].flipAngle)
             var newPos = enemies[idx].flipCenter.x + cos(enemies[idx].flipAngle) * enemies[idx].flipRad
-            if !hatch {enemies[idx].node.position.x = newPos}
-            else {
+            if !hatch {enemies[idx].node.position.x = newPos} else {
                 enemies[idx].node.position.x += (newPos - enemies[idx].node.position.x) * self.deltaTime
             }
             enemies[idx].node.position.y =  enemies[idx].initialPos.y + self.globalY
-            if hatch && abs(enemies[idx].node.position.x) < 10
-            {
-                //print("now")
+            if hatch && abs(enemies[idx].node.position.x) < 10 {
+                // print("now")
                 enemies[idx].flipRad = CGFloat.random(in: 300 ..< 1000)
             }
             enemies[idx].flipAngle += (self.deltaTime * (2.5 + ((hatch ? 1 : 0))))
         }
-        if hatch
-        {
+        if hatch {
             self.globalY += ((self.nextGlobalY - self.globalY) * self.deltaTime * 0.25)
-            if abs(self.nextGlobalY - self.globalY) < 75
-            {
+            if abs(self.nextGlobalY - self.globalY) < 75 {
                 self.nextGlobalY = CGFloat.random(in: 0 ..< 500) * (self.nextGlobalY * -1 / abs(self.nextGlobalY))
             }
         }
         if !stillAlive && self.changeLevelTimer == nil {
-            //self.scoreLabel.text = "You Win"
+            // self.scoreLabel.text = "You Win"
             gameState = gameState == .LEVEL3 ? .LEVEL4 : .LEVEL5
-            
+
             self.loadScene(scene: gameState)
         }
     }
-    
+
     func updateBird() {
         var stillAlive = false
         self.attackingEnemiesCounter = 0
@@ -246,16 +242,16 @@ extension GameScene {
             self.loadScene(scene: gameState)
         }
     }
-    func updateBoss(_ currentTime: TimeInterval)
-    {
+    func updateBoss(_ currentTime: TimeInterval) {
         if !boss.deployed || self.changeLevelTimer != nil {return}
         if boss.node.parent == nil {
-            //self.scoreLabel.text = "You Win"
             gameState = .LEVEL1
+            self.lives += 1
+            self.livesLabel.text = "Lives: \(self.lives)"
             self.loadScene(scene: gameState)
             return
         }
-        
+
         if currentTime > (boss.frameRef + 0.15) {
             boss.frameRef = currentTime
         for tile in boss.plateGrid {
@@ -265,12 +261,11 @@ extension GameScene {
             }
         }
         }
-        if currentTime > (boss.yGlobalRef + 0.5)
-        {
+        if currentTime > (boss.yGlobalRef + 0.5) {
             boss.yGlobalRef = currentTime
             boss.node.position.y -= 2
         }
-        
+
         self.updateBird()
     }
 }
