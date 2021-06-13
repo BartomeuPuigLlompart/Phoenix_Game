@@ -38,6 +38,7 @@ class GameScene: SKScene {
         var frameRef: TimeInterval = 0.0
         var yGlobalRef: TimeInterval = 0.0
         var deployed = false
+        var shootTimer: Timer!
     }
 
     public struct Enemy {
@@ -47,6 +48,7 @@ class GameScene: SKScene {
         var flipRad: CGFloat = 0.0
         var flipCenter = CGPoint(x: 0.0, y: 0.0)
         var flipAngle: CGFloat = 0.0
+        var timers: [Timer] = []
     }
 
     var pastTime = 0.0
@@ -69,7 +71,7 @@ class GameScene: SKScene {
     private var label: SKLabelNode?
     private var spinnyNode: SKShapeNode?
     private var spaceshipTouch: UITouch?
-    var gameState: GameState?
+    var gameState: GameState!
     var enemiesAttackTimer: Timer?
     var changeLevelTimer: Timer?
     var firstTouchShip: CGPoint = CGPoint(x: 0, y: 0)
@@ -82,7 +84,7 @@ class GameScene: SKScene {
 
     override func didMove(to view: SKView) {
 
-        gameState = GameState.LEVEL1
+        gameState = GameState.LEVEL5
 
         let spaceshipYPositon = -(self.size.height / 2) + 150
 
@@ -91,7 +93,7 @@ class GameScene: SKScene {
         self.ship.name = "spaceship"
         self.ship.size = CGSize(width: 50, height: 55)
         self.ship.position = CGPoint(x: 0, y: spaceshipYPositon)
-        self.ship.physicsBody = SKPhysicsBody(texture: self.ship.texture!, size: CGSize(width: self.ship.size.width * 0.25, height: self.ship.size.height * 0.25))
+        self.ship.physicsBody = SKPhysicsBody(texture: self.ship.texture!, size: CGSize(width: self.ship.size.width * 0.75, height: self.ship.size.height * 0.75))
         self.ship.physicsBody?.categoryBitMask = shieldCategory
         self.ship.physicsBody?.contactTestBitMask = enemyBombCategory | enemyCategory
         self.ship.physicsBody?.collisionBitMask = 0
@@ -101,9 +103,8 @@ class GameScene: SKScene {
         self.scoreLabel = SKLabelNode(text: "SCORE: 0")
         self.scoreLabel.position = CGPoint(x: 0, y: (self.size.height / 2) - 130)
         self.addChild(self.scoreLabel)
-        self.addBirds()
         self.physicsWorld.contactDelegate = self
-        Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
+        loadScene(scene: gameState)
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with _: UIEvent?) {
@@ -205,7 +206,7 @@ class GameScene: SKScene {
         
         @objc func setGreenFlag()
         {
-            greenFlag = true
+            greenFlag = self.changeLevelTimer == nil
         }
         @objc func setShipGreenFlag()
         {

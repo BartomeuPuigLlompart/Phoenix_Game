@@ -30,7 +30,8 @@ extension GameScene {
                 self.enemies[idx].node.physicsBody?.velocity = CGVector(dx: 0, dy: -500)
                 self.enemies[idx].node.run(enemyAnims[1])
                 self.greenFlag = false
-                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 10..<16), target: self, selector: #selector(setNewAttackers(sender:)), userInfo: idx, repeats: false)
+                var interval = TimeInterval.random(in: 10..<16)
+                self.enemies[idx].timers[1] = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(setNewAttackers(sender:)), userInfo: idx, repeats: false)
                 Timer.scheduledTimer(timeInterval: TimeInterval(self.deltaTime * 20), target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
             }
             Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 1..<4), target: self, selector: #selector(setNewAttackers(sender:)), userInfo: idx, repeats: false)
@@ -145,25 +146,7 @@ extension GameScene {
             //self.scoreLabel.text = "You Win"
             gameState = gameState == .LEVEL3 ? .LEVEL4 : .LEVEL5
             
-            
-            self.attackingEnemiesCounter = 0
-            self.greenFlag = false
-            Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
-            
-            if gameState == .LEVEL4 {
-                self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
-                                                             target: self,
-                                                             selector: #selector(addPhoenixes),
-                                                             userInfo: nil,
-                                                             repeats: false)
-            }
-            else {
-                self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
-                                                             target: self,
-                                                             selector: #selector(addBoss),
-                                                             userInfo: nil,
-                                                             repeats: false)
-            }
+            self.loadScene(scene: gameState)
         }
     }
     
@@ -259,43 +242,17 @@ extension GameScene {
             }
         }
         if gameState != .LEVEL5 && !stillAlive && self.changeLevelTimer == nil {
-            //self.scoreLabel.text = "You Win"
-            //if  {return}
             gameState = gameState == .LEVEL1 ? .LEVEL2 : .LEVEL3
-            self.attackingEnemiesCounter = 0
-            self.greenFlag = false
-            Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
-            if gameState == .LEVEL3 {
-                self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
-                                                             target: self,
-                                                             selector: #selector(addPhoenixes),
-                                                             userInfo: nil,
-                                                             repeats: false)
-            }
-            else {
-                self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
-                                                             target: self,
-                                                             selector: #selector(addBirds),
-                                                             userInfo: nil,
-                                                             repeats: false)
-            }
+            self.loadScene(scene: gameState)
         }
     }
     func updateBoss(_ currentTime: TimeInterval)
     {
-        if !boss.deployed {return}
+        if !boss.deployed || self.changeLevelTimer != nil {return}
         if boss.node.parent == nil {
             //self.scoreLabel.text = "You Win"
             gameState = .LEVEL1
-            self.attackingEnemiesCounter = 0
-            self.greenFlag = false
-            Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
-
-            self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
-                                                             target: self,
-                                                             selector: #selector(addBirds),
-                                                             userInfo: nil,
-                                                             repeats: false)
+            self.loadScene(scene: gameState)
             return
         }
         

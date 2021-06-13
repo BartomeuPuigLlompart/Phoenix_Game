@@ -2,6 +2,60 @@ import GameplayKit
 import SpriteKit
 
 extension GameScene {
+    func loadScene(scene: GameState)
+    {
+        gameState = scene
+        for enemy in self.enemies
+        {
+            for timer in enemy.timers {
+                timer.invalidate()
+            }
+            enemy.node.removeFromParent()
+        }
+        
+        for node in children {
+            guard node.name == "shoot" || node.name == "bomb"  else { continue }
+                node.removeFromParent()
+        }
+
+        self.ship.physicsBody = SKPhysicsBody(texture: self.ship.texture!, size: CGSize(width: self.ship.size.width * 0.75, height: self.ship.size.height * 0.75))
+        self.ship.physicsBody?.categoryBitMask = shieldCategory
+        self.ship.physicsBody?.contactTestBitMask = enemyBombCategory | enemyCategory
+        self.ship.physicsBody?.collisionBitMask = 0
+        self.ship.physicsBody?.affectedByGravity = false
+        
+        self.attackingEnemiesCounter = 0
+        self.greenFlag = false
+        
+        
+        switch scene {
+        case .LEVEL1, .LEVEL2:
+            self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
+                                                         target: self,
+                                                         selector: #selector(addBirds),
+                                                         userInfo: nil,
+                                                         repeats: false)
+        case .LEVEL3, .LEVEL4:
+            globalY = 0.0
+            nextGlobalY = -300.0
+            self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
+                                                         target: self,
+                                                         selector: #selector(addPhoenixes),
+                                                         userInfo: nil,
+                                                         repeats: false)
+        case .LEVEL5:
+            self.boss.node.removeFromParent()
+            if self.boss.shootTimer != nil { self.boss.shootTimer.invalidate() }
+            self.changeLevelTimer = Timer.scheduledTimer(timeInterval: 2,
+                                                         target: self,
+                                                         selector: #selector(addBoss),
+                                                         userInfo: nil,
+                                                         repeats: false)
+        default:
+            return
+        }
+    }
+    
     func shoot() {
         let sprite = SKSpriteNode(imageNamed: "Shoot")
         sprite.position = self.ship.position
@@ -38,10 +92,10 @@ extension GameScene {
             var nextInterval: TimeInterval
             switch enemyStruct.name {
             case "enemy_1_1":
-                nextInterval = TimeInterval.random(in: 2..<16)
+                nextInterval = TimeInterval.random(in: 10..<20)
                 Timer.scheduledTimer(timeInterval: nextInterval, target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
             case "enemy_1_2":
-                nextInterval = TimeInterval.random(in: 2..<10)
+                nextInterval = TimeInterval.random(in: 8..<16)
                 Timer.scheduledTimer(timeInterval: nextInterval, target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
             case "enemy_2_1":
                 nextInterval = TimeInterval.random(in: TimeInterval(deltaTime) ..< 4)
@@ -51,9 +105,44 @@ extension GameScene {
                 Timer.scheduledTimer(timeInterval: nextInterval, target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
             default:
                 sprite.position.x = self.ship.position.x + CGFloat.random(in: -self.ship.size.width * 3 ..< self.ship.size.width * 3 + 1)
-                nextInterval = TimeInterval.random(in: TimeInterval(deltaTime) ..< 2.5)
-                Timer.scheduledTimer(timeInterval: nextInterval , target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
+                nextInterval = TimeInterval.random(in: TimeInterval(deltaTime) ..< 6)
+                self.boss.shootTimer = Timer.scheduledTimer(timeInterval: nextInterval , target: self, selector: #selector(enemyShoot(sender:)), userInfo: enemyStruct, repeats: false)
             }
+        }
+    }
+    
+    func loadKillAnim(pos: CGPoint, bonus: Bool, type2: Bool, wingCut: Bool)
+    {
+        let sprite = SKSpriteNode(imageNamed: !bonus ? "enemy_rip_1" : (type2 ? "enemy_bonus_2" : "enemy_bonus"))
+        sprite.position = pos
+        sprite.name = "killAnim"
+        sprite.size = CGSize(width: sprite.size.width * 4, height: sprite.size.height * 4)
+        sprite.zPosition = 1
+        addChild(sprite)
+        if !bonus {
+        let enemyAnimatedAtlas = SKTextureAtlas(named: "FX")
+        var moveFrames: [SKTexture] = []
+        var animation: SKAction
+        for index in 1 ... 4 {
+            let enemyTextureName = "enemy_rip_" + "\(type2 ? index + 4 : index)"
+            moveFrames.append(enemyAnimatedAtlas.textureNamed(enemyTextureName))
+        }
+        if wingCut { moveFrames.removeFirst() }
+        animation = SKAction.animate(
+            with: moveFrames,
+            timePerFrame: 0.1,
+            resize: false,
+            restore: true)
+        sprite.run(SKAction.sequence([animation, SKAction.removeFromParent()]))
+        }
+        else {
+            guard let reversedCopy = sprite.copy() as? SKSpriteNode else { return}
+            reversedCopy.xScale *= -1
+            sprite.position.x -= 100
+            sprite.run(SKAction.sequence([SKAction.moveTo(x: sprite.position.x - 200, duration: 0.35), SKAction.removeFromParent()]))
+            reversedCopy.position.x += 100
+            reversedCopy.run(SKAction.sequence([SKAction.moveTo(x: reversedCopy.position.x + 200, duration: 0.35), SKAction.removeFromParent()]))
+            addChild(reversedCopy)
         }
     }
 
@@ -118,13 +207,13 @@ extension GameScene {
     }
     
     func loadL5Enemies() {
-        enemies = [Enemy(initialPos: CGPoint(x: 0, y: -40)),
-                   Enemy(initialPos: CGPoint(x: 150.0, y: -40)),
-                   Enemy(initialPos: CGPoint(x: -150.0, y: -40)),
-                   Enemy(initialPos: CGPoint(x: 75.0, y: -40)),
-                   Enemy(initialPos: CGPoint(x: -75.0, y: -40)),
-                   Enemy(initialPos: CGPoint(x: 225.0, y: -40)),
-                   Enemy(initialPos: CGPoint(x: -225.0, y: -40)),
+        enemies = [Enemy(initialPos: CGPoint(x: 0, y: 60)),
+                   Enemy(initialPos: CGPoint(x: 150.0, y: 60)),
+                   Enemy(initialPos: CGPoint(x: -150.0, y: 60)),
+                   Enemy(initialPos: CGPoint(x: 75.0, y: 60)),
+                   Enemy(initialPos: CGPoint(x: -75.0, y: 60)),
+                   Enemy(initialPos: CGPoint(x: 225.0, y: 60)),
+                   Enemy(initialPos: CGPoint(x: -225.0, y: 60)),
                    Enemy(initialPos: CGPoint(x: -300, y: 110)),
                    Enemy(initialPos: CGPoint(x: 300, y: 110)),
                    Enemy(initialPos: CGPoint(x: -225, y: 150)),
@@ -182,7 +271,7 @@ extension GameScene {
             [("enemy_1_\(sceneNum)_static_", 3, 0.3),
              ("enemy_1_\(sceneNum)_attacking_", 2, 0.3),
              ("enemy_1_\(sceneNum)_returning_", 1, 0.3),
-             ("enemy_1_\(sceneNum)_spawn_", 4, 0.3)]
+             ("enemy_1_\(sceneNum)_spawn_", 4, 0.1)]
         enemyAnims = Array(repeating: SKAction(), count: animationCount)
         var fleeFrames = Array(repeating: SKTexture(), count: 7)
         for anim in 0 ... animationsAtr.count-1 {
@@ -232,10 +321,13 @@ extension GameScene {
                 self.enemies[index].flipRad = 200
                 self.addChild(self.enemies[index].node)
                 self.enemies[index].node.run(enemyAnims[3])
-                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 3..<6), target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.enemies[index].node, repeats: false)
-                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 3..<7), target: self, selector: #selector(setNewAttackers(sender:)), userInfo: index, repeats: false)
+                self.enemies[index].timers = [Timer(), Timer()]
+                var interval = TimeInterval.random(in: 3..<20)
+                self.enemies[index].timers[0] = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.enemies[index].node, repeats: false)
+                interval = TimeInterval.random(in: 3..<7)
+                self.enemies[index].timers[1] = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(setNewAttackers(sender:)), userInfo: index, repeats: false)
             }
-
+        Timer.scheduledTimer(timeInterval: 2, target: self, selector: #selector(setGreenFlag), userInfo: nil, repeats: false)
     }
     
     @objc
@@ -302,8 +394,11 @@ extension GameScene {
                 self.enemies[index].state = .EGGSPAWN
                 self.addChild(self.enemies[index].node)
                 self.enemies[index].node.run(enemyAnims[5])
-                Timer.scheduledTimer(timeInterval: TimeInterval.random(in: 9..<12), target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.enemies[index].node, repeats: false)
-                Timer.scheduledTimer(timeInterval: TimeInterval((3 + (index / 5))), target: self, selector: #selector(setNewPhoenixAnim(sender:)), userInfo: index, repeats: false)
+                self.enemies[index].timers = [Timer(), Timer()]
+                var interval = TimeInterval.random(in: 9..<12)
+                self.enemies[index].timers[0] = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.enemies[index].node, repeats: false)
+                interval = TimeInterval((3 + (index / 5)))
+                self.enemies[index].timers[1] = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(setNewPhoenixAnim(sender:)), userInfo: index, repeats: false)
             }
 
     }
@@ -392,8 +487,9 @@ extension GameScene {
                 }
             }
         }
+        self.boss.node.position.y += 100
         let nextInterval = TimeInterval.random(in: TimeInterval(deltaTime) ..< 2.5)
-        Timer.scheduledTimer(timeInterval: nextInterval , target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.boss.node, repeats: false)
+        boss.self.shootTimer = Timer.scheduledTimer(timeInterval: nextInterval , target: self, selector: #selector(enemyShoot(sender:)), userInfo: self.boss.node, repeats: false)
         self.addBirds()
     }
 }

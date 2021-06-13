@@ -30,53 +30,8 @@ extension GameScene: SKPhysicsContactDelegate {
         if oneBossSurface, oneNodeIsShoot {
             guard let surface = (nameA.hasPrefix("shoot") ? nodeB : nodeA) as? SKSpriteNode else {return}
             let shoot = nameA == "shoot" ? nodeA : nodeB
-            switch surface.name?.prefix(5) {
-            case "plate":
-                if surface.name?.last == "3"
-                {
-                    surface.texture = nil
-                    surface.physicsBody = nil
-                    surface.name = "plate_tile_0"
-                }
-                else {
-                    surface.texture = SKTexture(imageNamed: "plate_tile_3")
-                    surface.name = "plate_tile_3"
-                }
-            case "base_":
-                guard let str = String((surface.name?.last)!) as? String else {return}
-                guard let num = Int(str) as? Int else {return}
-                if (1 + num) <= 5 {
-                surface.texture = SKTexture(imageNamed: "base_tile_\(num + 1)")
-               surface.name = "base_tile_\(num + 1)"
-                }
-                else {
-                    surface.texture = nil
-                    surface.physicsBody = nil
-                    surface.name = "base_tile_0"
-                    print(self.boss.node.position.y)
-                    for tile in 0 ... 2 {
-                        if boss.baseGrid[tile + 1][Int((surface.position.x + 272) / 32)].texture != nil {
-                    boss.baseGrid[tile][Int((surface.position.x + 272) / 32)].texture = SKTexture(imageNamed: "base_tile_1")
-                    boss.baseGrid[tile][Int((surface.position.x + 272) / 32)].name = "base_tile_1"
-                        }
-                        else if boss.baseGrid[tile][Int((surface.position.x + 272) / 32)].name?.last == "1" {
-                            boss.baseGrid[tile][Int((surface.position.x + 272) / 32)].texture = SKTexture(imageNamed: "base_tile_2")
-                            boss.baseGrid[tile][Int((surface.position.x + 272) / 32)].name = "base_tile_2"
-                        }
-                    }
-                }
-            case "alien":
-                surface.parent?.removeFromParent()
-                for enemy in self.enemies
-                {
-                    enemy.node.removeFromParent()
-                }
-                self.score += Int.random(in: 10..<91) * 100
-                self.scoreLabel.text = "SCORE: \(self.score)"
-            default:
-                return
-            }
-            shoot.removeFromParent()
+            
+            self.bossContact(surface: surface, shoot: shoot)
         }
         if oneNodeIsBomb || oneBossSurface || oneNodeIsEnemy, oneNodeIsShip || shieldEnabled {
             /*nodeA.removeFromParent()
@@ -89,23 +44,79 @@ extension GameScene: SKPhysicsContactDelegate {
     func checkImpact(nodeA: SKNode, nodeB: SKNode, shield: Bool)
     {
         guard let nameA = nodeA.name, let nameB = nodeB.name else { return }
-        if shield {
-            if nodeA.name == "bomb" || nameA.hasPrefix("enemy")
-            {
-                nodeA.removeFromParent()
-            }
-            else if nodeB.name == "bomb" || nameB.hasPrefix("enemy")
-            {
-                nodeB.removeFromParent()
-            }
-            
-        } else {
+        if nameA == "spaceship" || nameA == "shield" {
+            nodeB.removeFromParent()
+        }
+        else {
+            nodeA.removeFromParent()
+        }
+        if !shield {
+            self.ship.physicsBody = nil
             self.ship.run(SKAction.sequence([SKAction.repeat(SKAction.animate(
                                             with: [SKTexture(imageNamed: "ship_rip_1"), SKTexture(imageNamed: "ship_rip_2")],
                                             timePerFrame: 0.1,
                                             resize: false,
-                                         restore: true), count: 5),SKAction.setTexture(SKTexture(imageNamed: "ship_sprite"))]))
+                                                                restore: true), count: 5), SKAction.setTexture(SKTexture(imageNamed: "ship_sprite")), SKAction.run {
+                                                                    self.loadScene(scene: self.gameState)
+                                                                }]))
         }
+    }
+    
+    func bossContact(surface: SKSpriteNode, shoot: SKNode)
+    {
+        switch surface.name?.prefix(5) {
+        case "plate":
+            if surface.name?.last == "3"
+            {
+                surface.texture = nil
+                surface.physicsBody = nil
+                surface.name = "plate_tile_0"
+            }
+            else {
+                surface.texture = SKTexture(imageNamed: "plate_tile_3")
+                surface.name = "plate_tile_3"
+            }
+        case "base_":
+            guard let str = String((surface.name?.last)!) as? String else {return}
+            guard let num = Int(str) as? Int else {return}
+            if (1 + num) <= 5 {
+            surface.texture = SKTexture(imageNamed: "base_tile_\(num + 1)")
+           surface.name = "base_tile_\(num + 1)"
+            }
+            else {
+                surface.texture = nil
+                surface.physicsBody = nil
+                surface.name = "base_tile_0"
+                print(self.boss.node.position.y)
+                for tile in 0 ... 2 {
+                    if boss.baseGrid[tile + 1][Int((surface.position.x + 272) / 32)].texture != nil {
+                boss.baseGrid[tile][Int((surface.position.x + 272) / 32)].texture = SKTexture(imageNamed: "base_tile_1")
+                boss.baseGrid[tile][Int((surface.position.x + 272) / 32)].name = "base_tile_1"
+                    }
+                    else if boss.baseGrid[tile][Int((surface.position.x + 272) / 32)].name?.last == "1" {
+                        boss.baseGrid[tile][Int((surface.position.x + 272) / 32)].texture = SKTexture(imageNamed: "base_tile_2")
+                        boss.baseGrid[tile][Int((surface.position.x + 272) / 32)].name = "base_tile_2"
+                    }
+                }
+            }
+        case "alien":
+            for child in self.boss.node.children
+            {
+                if child.name != "bomb" {
+                    self.loadKillAnim(pos: child.position, bonus: false, type2: false, wingCut: false)
+                }
+            }
+            surface.parent?.removeFromParent()
+            for enemy in self.enemies
+            {
+                enemy.node.removeFromParent()
+            }
+            self.score += Int.random(in: 10..<91) * 100
+            self.scoreLabel.text = "SCORE: \(self.score)"
+        default:
+            return
+        }
+        shoot.removeFromParent()
     }
     
     func enemyContact(enemy: SKSpriteNode, shoot: SKNode)
@@ -117,14 +128,18 @@ extension GameScene: SKPhysicsContactDelegate {
         case "1":
             let diagonalSpeed: Double = 600
             let enemySpeed = (simd_length(_: simd_double2(x: Double(enemy.physicsBody?.velocity.dx ?? 0), y: Double(enemy.physicsBody?.velocity.dy ?? 0))))
-            let bonus = [20, 40, 80]
-            addedScore = enemySpeed > diagonalSpeed ? 200 : bonus[(Int.random(in: 0..<3))]
+            let normalScore = [20, 40, 80]
+            let isBonus = (enemySpeed > diagonalSpeed)
+            addedScore = isBonus ? 200 : normalScore[(Int.random(in: 0..<3))]
+            self.loadKillAnim(pos: enemy.position, bonus: isBonus, type2: self.gameState == .LEVEL2 || self.gameState == .LEVEL5, wingCut: false)
             enemy.removeFromParent()
         case "2":
             let offsetHit: CGFloat = 16
             guard var bounce = enemy.physicsBody?.restitution else {return}
             if abs(enemy.position.x - shoot.position.x) < offsetHit || enemy.texture?.size().width ?? 25.0 < 23.0 {
-                addedScore = enemy.texture?.size().width ?? 25.0 < 23.0 ? Int.random(in: 1..<3) * 50 : Int.random(in: 10..<81) * 10
+                let isBonus = !(enemy.texture?.size().width ?? 25.0 < 23.0)
+                addedScore = isBonus ? Int.random(in: 10..<81) * 10 : Int.random(in: 1..<3) * 50
+                self.loadKillAnim(pos: enemy.position, bonus: isBonus, type2: self.gameState == .LEVEL4, wingCut: false)
                 enemy.removeFromParent()
                 print("middle")
             } else if CGFloat(round(10*bounce)/10) != 0.2 && shoot.position.x < enemy.position.x {
@@ -136,6 +151,7 @@ extension GameScene: SKPhysicsContactDelegate {
                     print("both")
                     enemy.run(SKAction.repeatForever(enemyAnims[0]))
                     bounce = 0.1 }
+                self.loadKillAnim(pos: CGPoint(x: shoot.position.x , y: enemy.position.y), bonus: false, type2: self.gameState == .LEVEL4, wingCut: true)
             } else if CGFloat(round(10*bounce)/10) != 0.3 {
                 if CGFloat(round(10*bounce)/10) == 0 {
                     print("right")
@@ -146,6 +162,7 @@ extension GameScene: SKPhysicsContactDelegate {
                     enemy.run(SKAction.repeatForever(enemyAnims[0]))
                     bounce = 0.1
                 }
+                self.loadKillAnim(pos: CGPoint(x: shoot.position.x , y: enemy.position.y), bonus: false, type2: self.gameState == .LEVEL4, wingCut: true)
                 }
             if addedScore == 0 {
             enemy.size = self.largeSize
